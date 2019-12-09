@@ -1,6 +1,6 @@
 #include "logg.hh"
 
-#include "UniversalClock.hh"
+#include "ux/Calandar.hh"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -13,30 +13,7 @@ logg::Timer rendertimer;
 logg::Timer imguitimer;
 
 
-void clock_ctrl()
-{
-	static int delta_time = 1;
 
-	if (ImGui::Begin("Clock")) {
-		ImGui::DragInt("Advance by : ", &delta_time);
-		if (ImGui::Button("sec")) UniversalClock::advance(UniversalClock::seconds(delta_time));
-		ImGui::SameLine();
-		if (ImGui::Button("min")) UniversalClock::advance(UniversalClock::minutes(delta_time));
-		ImGui::SameLine();
-		if (ImGui::Button("hour")) UniversalClock::advance(UniversalClock::hours(delta_time));
-		ImGui::SameLine();
-		if (ImGui::Button("day")) UniversalClock::advance(UniversalClock::days(delta_time));
-		ImGui::SameLine();
-		if (ImGui::Button("week")) UniversalClock::advance(UniversalClock::weeks(delta_time));
-		ImGui::SameLine();
-		if (ImGui::Button("month")) UniversalClock::advance(UniversalClock::months(delta_time));
-		ImGui::SameLine();
-		if (ImGui::Button("year")) UniversalClock::advance(UniversalClock::years(delta_time));
-		std::tm tm = UniversalClock::to_tm(UniversalClock::now());
-		ImGui::BulletText("time is %s", std::asctime(&tm));
-	}
-	ImGui::End();
-}
 
 
 void debug_timer_ctrl()
@@ -59,6 +36,7 @@ int main(int, char const * const *, char const * const *)
 	imguitimer  = COUT_TIMER("imgui         ");
 
 	sf::RenderWindow window;
+	ux::Calandar calandar;
 
 	window.create(sf::VideoMode(1900, 900), "project_x");
 	window.setFramerateLimit(60);
@@ -84,8 +62,7 @@ int main(int, char const * const *, char const * const *)
 
 
 			debug_timer_ctrl();
-			clock_ctrl();
-
+			calandar.display();
 		}
 
 		ImGui::ShowDemoWindow();

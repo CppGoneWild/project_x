@@ -19,6 +19,8 @@ SRC = external/ImGui/imgui-SFML.cpp \
       external/serializer/Tokenizer.cpp \
       external/serializer/Tree.cpp \
       \
+      src/ux/Calandar.cpp \
+      \
       src/UniversalClock.cpp \
       src/main.cpp
 
