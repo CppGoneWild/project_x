@@ -2,6 +2,9 @@
 
 #include "ux/Calandar.hh"
 
+#include "UniversalClock.hh"
+#include "Colony.hh"
+
 #include "imgui.h"
 #include "imgui-SFML.h"
 
@@ -37,6 +40,13 @@ int main(int, char const * const *, char const * const *)
 
 	sf::RenderWindow window;
 	ux::Calandar calandar;
+	Colony colony;
+
+	colony.name() = "Alpha";
+	colony.population() = 1000;
+	colony.gross_colonial_product() = 10000;
+	colony.population_growth() = 1.001;
+	colony.gross_colonial_product_growth() = 1.001;
 
 	window.create(sf::VideoMode(1900, 900), "project_x");
 	window.setFramerateLimit(60);
@@ -60,6 +70,28 @@ int main(int, char const * const *, char const * const *)
 
 			ImGui::SFML::Update(window, sf::milliseconds(160));
 
+			colony.update(UniversalClock::last_tic(), UniversalClock::now());
+
+			if (ImGui::Begin("Colony")) {
+				ImGui::BulletText("name : %s", colony.name().c_str());
+
+				ImGui::SetNextWindowContentSize(ImVec2(0, 200));
+				ImGui::PlotHistogram("pop. distrib", colony._population_distrib.data(), colony._population_distrib.size(),
+					0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 600), sizeof(float));
+				ImGui::BulletText("sum %f", sum(colony._population_distrib));
+				//ImGui::BulletText("median %f", median(colony._population_distrib));
+				ImGui::BulletText("mean %f", mean(colony._population_distrib));
+				ImGui::BulletText("geometric_mean %f", geometric_mean(colony._population_distrib));
+
+
+				ImGui::DragInt("population", &colony.population());
+
+				ImGui::DragInt("population", &colony.population());
+				ImGui::DragFloat("population growth", &colony.population_growth());
+				ImGui::DragInt("gcd", &colony.gross_colonial_product());
+				ImGui::DragFloat("gcd growth", &colony.gross_colonial_product_growth());
+			}
+			ImGui::End();
 
 			debug_timer_ctrl();
 			calandar.display();

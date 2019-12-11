@@ -21,6 +21,7 @@ SRC = external/ImGui/imgui-SFML.cpp \
       \
       src/ux/Calandar.cpp \
       \
+      src/Colony.cpp \
       src/UniversalClock.cpp \
       src/main.cpp
 
