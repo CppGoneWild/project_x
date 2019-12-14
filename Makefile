@@ -21,8 +21,7 @@ SRC = external/ImGui/imgui-SFML.cpp \
       \
       src/ux/Calandar.cpp \
       \
-      src/Colony.cpp \
-      src/UniversalClock.cpp \
+      src/time.cpp \
       src/main.cpp
 
 OBJ = $(SRC:.cpp=.o)
@@ -30,10 +29,12 @@ OBJ = $(SRC:.cpp=.o)
 INCLUDE_SFML_FLAGS =
 INCLUDE_OTHER_FLAGS = -Isrc/ -Iexternal/ -Iexternal/ImGui
 WARNING_FLAGS = -Wall -Wextra
-CXXFLAGS = -std=c++17 $(WARNING_FLAGS) $(INCLUDE_OTHER_FLAGS) $(INCLUDE_SFML_FLAGS) -g
+DEBUG_FLAGS = -g -DDEBUG
 
 LD_SFML_FLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 LD_IMGUI_FLAGS = -lGL
+
+CXXFLAGS = -std=c++17 $(WARNING_FLAGS) $(INCLUDE_OTHER_FLAGS) $(INCLUDE_SFML_FLAGS) $(DEBUG_FLAGS)
 LDFLAGS = $(LD_IMGUI_FLAGS) $(LD_SFML_FLAGS)
 
 all : $(NAME)

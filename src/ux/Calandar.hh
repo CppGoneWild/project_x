@@ -5,6 +5,9 @@
 #include <string>
 
 
+class Scheduler;
+
+
 namespace ux
 {
 
@@ -15,7 +18,7 @@ public:
 	Calandar()  = default;
 	~Calandar() = default;
 
-	void display();
+	void display(Scheduler &);
 
 private:
 	Calandar(Calandar const &)             = delete;
