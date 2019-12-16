@@ -41,13 +41,16 @@ public:
 	static time_point now() noexcept;
 	static duration last_tic() noexcept;
 
+	static duration advance(time_point) noexcept;
+	static duration advance(duration) noexcept;
 	template <class REP, class PERIOD>
 	static duration advance(std::chrono::duration<REP, PERIOD>) noexcept;
-	static duration advance(time_point) noexcept;
 
 	static std::tm to_tm(time_point) noexcept;
 
 	static std::string to_string(time_point);
+	static std::string to_string(duration d);
+
 	template <class REP, class PERIOD>
 	static std::string to_string(std::chrono::duration<REP, PERIOD>);
 
@@ -64,48 +67,6 @@ private:
 	static time_point _now;
 	static duration _last_tic;
 };
-
-
-
-template <class REP, class PERIOD>
-UniversalClock::duration UniversalClock::advance(std::chrono::duration<REP, PERIOD> d) noexcept
-{
-	_last_tic = std::chrono::duration_cast<UniversalClock::seconds>(d);
-	_now += _last_tic;
-	return (_last_tic);
-}
-
-template <class D>
-D to_integer_duration(D d)
-{
-	return (D(int(d.count())));
-}
-
-template <class REP, class PERIOD>
-std::string UniversalClock::to_string(std::chrono::duration<REP, PERIOD> d)
-{
-	std::string res;
-
-	auto write_duration_order = [&res, &d](auto duration_as_integer, char const * const c_unit)
-	{
-		if (duration_as_integer.count() >= 1.0) {
-			res += std::to_string(int(duration_as_integer.count())) + c_unit;
-			d -= std::chrono::duration_cast<UniversalClock::seconds>(duration_as_integer);
- 		}
-	};
-
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::century>(d)), "C");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "Y");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "M");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::days>(d)),  "d");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::hours>(d)), "h");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::minutes>(d)), "m");
-
-	if (d.count() > 0)
-		res += std::to_string(d.count()) + "s";
-
-	return (res);
-}
 
 
 
@@ -153,6 +114,7 @@ public:
 	Timer & operator=(Timer &&)      = default;
 
 	explicit Timer(time_point next_update); // single shot mode
+	Timer(duration frequency, time_point current_time);
 	template <class D> Timer(D frequency, time_point current_time);
 
 	virtual time_point next_update() const override;
@@ -168,18 +130,6 @@ private:
 	duration _frequency;
 	time_point _next_update;
 };
-
-
-
-template <class D>
-Timer::Timer(D frequency, time_point current_time)
-: I_Timer(),
-  _frequency(std::chrono::duration_cast<duration>(frequency)),
-  _next_update(current_time + _frequency)
-{
-	assert(_frequency != duration()); // use single shot mode
-	_last_update = current_time;
-}
 
 
 
@@ -226,6 +176,10 @@ public:
 	virtual void update(time_point date) override;
 
 	time_point can_adv_to(time_point date) const;
+
+	void advance_until(time_point date);
+	void advance_until(UniversalClock::duration delta);
+	template <class D> void advance_until(D delta);
 
 	/**
 	 * @brief return if is sorted by time in REVERSE order
@@ -275,20 +229,7 @@ private:
 
 
 
-template <class IT>
-void Scheduler::add(IT first, IT last)
-{
-	for (; first != last; first++)
-		add(*first);
-}
-
-template <class IT>
-void Scheduler::add_and_sort(IT first, IT last)
-{
-	add(first, last);
-	sort();
-}
-
+#include "time.ipp"
 
 
 

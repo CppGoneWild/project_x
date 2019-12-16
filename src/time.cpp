@@ -36,6 +36,13 @@ UniversalClock::duration UniversalClock::advance(time_point t) noexcept
 	return (_last_tic);
 }
 
+UniversalClock::duration UniversalClock::advance(duration d) noexcept
+{
+	_last_tic = d;
+	_now += _last_tic;
+	return (_last_tic);
+}
+
 std::tm UniversalClock::to_tm(time_point t) noexcept
 {
 	static constexpr int linux_epoch_years = 1900;
@@ -73,6 +80,36 @@ std::string UniversalClock::to_string(time_point t)
 	return (std::string(asciitime));
 }
 
+template <class D>
+D to_integer_duration(D d)
+{
+	return (D(int(d.count())));
+}
+
+std::string UniversalClock::to_string(duration d)
+{
+	std::string res;
+
+	auto write_duration_order = [&res, &d](auto duration_as_integer, char const * const c_unit)
+	{
+		if (duration_as_integer.count() >= 1.0) {
+			res += std::to_string(int(duration_as_integer.count())) + c_unit;
+			d -= std::chrono::duration_cast<UniversalClock::seconds>(duration_as_integer);
+ 		}
+	};
+
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::century>(d)), "C");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "Y");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "M");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::days>(d)),  "d");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::hours>(d)), "h");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::minutes>(d)), "m");
+
+	if (d.count() > 0)
+		res += std::to_string(d.count()) + "s";
+
+	return (res);
+}
 
 
 /*
@@ -127,6 +164,13 @@ Timer::Timer(time_point next_update)
 : I_Timer(), _frequency(), _next_update(next_update)
 {}
 
+Timer::Timer(duration frequency, time_point current_time)
+: I_Timer(), _frequency(frequency), _next_update(current_time + _frequency)
+{
+	assert(_frequency != duration()); // use single shot mode
+	_last_update = current_time;
+}
+
 I_Timer::time_point Timer::next_update() const
 {
 	return (_next_update);
@@ -174,6 +218,8 @@ void Timer::update(UniversalClock::time_point date)
                   ___/ / /__/ / / /  __/ /_/ / /_/ / /  __/ /
                  /____/\___/_/ /_/\___/\__,_/\__,_/_/\___/_/
 */
+
+
 
 /**
  * @brief used to sort the Scheduler list by time in REVERSE_ORDER
@@ -251,6 +297,23 @@ Scheduler::time_point Scheduler::can_adv_to(time_point date) const
 	}
 
 	return (next_date);
+}
+
+void Scheduler::advance_until(time_point date)
+{
+	auto intermediate = can_adv_to(date);
+	for (; intermediate <= date && intermediate != time_point::max();
+		 intermediate = can_adv_to(date)) {
+		UniversalClock::advance(intermediate - UniversalClock::now());
+		update(intermediate);
+	}
+	if (intermediate == time_point::max() && UniversalClock::now() < date)
+		UniversalClock::advance(date - UniversalClock::now());	
+}
+
+void Scheduler::advance_until(UniversalClock::duration delta)
+{
+	advance_until(UniversalClock::now() + delta);
 }
 
 bool Scheduler::is_sorted() const
