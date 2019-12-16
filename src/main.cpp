@@ -60,6 +60,7 @@ int main(int, char const * const *, char const * const *)
 	//scheduler.add(every_day);
 	scheduler.add(every_week);
 	scheduler.add(every_month);
+	scheduler.add(single_shot);
 	scheduler.sort();
 
 	COUT_INFO << "Main loop start";

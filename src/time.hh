@@ -7,8 +7,11 @@
 #include <cstdint>
 #include <ratio>
 #include <chrono>
-#include <ctime> // struct tm;
+#include <ctime>      // struct tm;
 #include <functional> // reference_wrapper
+#include <sstream>
+#include <iomanip>    // setprecision
+#include <string>
 #include <cassert>
 
 
@@ -33,17 +36,20 @@ public:
 	using months   = std::chrono::duration<double, std::ratio<2629746>>;   ///< Exactly 1/12 of a year
 	using years    = std::chrono::duration<double, std::ratio<31556952>>;  ///<  365.2425 days
 	using century  = std::chrono::duration<double, std::ratio<3155695200>>;
-	using milenary = std::chrono::duration<double, std::ratio<31556952000>>;
 
 
 	static time_point now() noexcept;
 	static duration last_tic() noexcept;
 
 	template <class REP, class PERIOD>
-	static duration advance(std::chrono::duration<REP, PERIOD> d) noexcept;
+	static duration advance(std::chrono::duration<REP, PERIOD>) noexcept;
 	static duration advance(time_point) noexcept;
 
 	static std::tm to_tm(time_point) noexcept;
+
+	static std::string to_string(time_point);
+	template <class REP, class PERIOD>
+	static std::string to_string(std::chrono::duration<REP, PERIOD>);
 
 private:
 	UniversalClock()                       = delete;
@@ -64,9 +70,41 @@ private:
 template <class REP, class PERIOD>
 UniversalClock::duration UniversalClock::advance(std::chrono::duration<REP, PERIOD> d) noexcept
 {
-	_last_tic = UniversalClock::seconds(UniversalClock::rep(d.count()) * PERIOD::num);
+	_last_tic = std::chrono::duration_cast<UniversalClock::seconds>(d);
 	_now += _last_tic;
 	return (_last_tic);
+}
+
+template <class D>
+D to_integer_duration(D d)
+{
+	return (D(int(d.count())));
+}
+
+template <class REP, class PERIOD>
+std::string UniversalClock::to_string(std::chrono::duration<REP, PERIOD> d)
+{
+	std::string res;
+
+	auto write_duration_order = [&res, &d](auto duration_as_integer, char const * const c_unit)
+	{
+		if (duration_as_integer.count() >= 1.0) {
+			res += std::to_string(int(duration_as_integer.count())) + c_unit;
+			d -= std::chrono::duration_cast<UniversalClock::seconds>(duration_as_integer);
+ 		}
+	};
+
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::century>(d)), "C");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "Y");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "M");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::days>(d)),  "d");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::hours>(d)), "h");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::minutes>(d)), "m");
+
+	if (d.count() > 0)
+		res += std::to_string(d.count()) + "s";
+
+	return (res);
 }
 
 
@@ -82,7 +120,11 @@ public:
 	virtual time_point next_next_update() const = 0;
 	virtual void update(time_point date) = 0;
 
+	double progress(time_point date) const;
+
 	static time_point max();
+
+	time_point last_update() const;
 
 protected:
 	I_Timer();
@@ -92,12 +134,7 @@ protected:
 	I_Timer & operator=(I_Timer const &) = default;
 	I_Timer & operator=(I_Timer &&)      = default;
 
-#ifdef DEBUG
-public:
-	time_point last_update;
-	double progress(time_point date) const;
-#endif // DEBUG
-
+	time_point _last_update;
 };
 
 
@@ -141,6 +178,7 @@ Timer::Timer(D frequency, time_point current_time)
   _next_update(current_time + _frequency)
 {
 	assert(_frequency != duration()); // use single shot mode
+	_last_update = current_time;
 }
 
 

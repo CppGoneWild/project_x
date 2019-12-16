@@ -25,6 +25,29 @@ static void go(Scheduler & scheduler, D delta)
 		UniversalClock::advance(date - UniversalClock::now());
 }
 
+static void display_scheduler(Scheduler & scheduler)
+{
+	ImGui::TreePush(&scheduler);
+	ImGui::Text("%s", UniversalClock::to_string(scheduler.next_update() - UniversalClock::now()).c_str());
+	ImGui::SameLine();
+	ImGui::ProgressBar(scheduler.progress(UniversalClock::now()), ImVec2(-1, 0));
+
+	for (auto it = scheduler.crbegin(); it != scheduler.crend(); ++it) {
+
+		auto const * is_scheduler = dynamic_cast<Scheduler const *>(&it->get());
+		if (is_scheduler) {
+			display_scheduler(scheduler);
+		}
+		else {
+			ImGui::TreePush(&it->get());
+			ImGui::Text("%s", UniversalClock::to_string(it->get().next_update() - UniversalClock::now()).c_str());
+			ImGui::SameLine();
+			ImGui::ProgressBar(it->get().progress(UniversalClock::now()), ImVec2(-1, 0));
+			ImGui::TreePop();
+		}
+	}
+	ImGui::TreePop();
+}
 
 void ux::Calandar::display(Scheduler & scheduler)
 {
@@ -53,6 +76,8 @@ void ux::Calandar::display(Scheduler & scheduler)
 		if (ImGui::Button("month")) go(scheduler, UniversalClock::months(_time_incr));
 		ImGui::SameLine();
 		if (ImGui::Button("year")) go(scheduler, UniversalClock::years(_time_incr));
+
+		display_scheduler(scheduler);
 	}
 	ImGui::End();
 }

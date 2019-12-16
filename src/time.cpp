@@ -61,6 +61,18 @@ std::tm UniversalClock::to_tm(time_point t) noexcept
 	return (res);
 }
 
+std::string UniversalClock::to_string(time_point t)
+{
+	static const char date_format[] = "%H:%M:%S %a %b %d-%m-%Y";
+
+	char asciitime[128] = {'\0'};
+	std::tm tm = UniversalClock::to_tm(t);
+
+	std::strftime(asciitime, 128, date_format, &tm);
+
+	return (std::string(asciitime));
+}
+
 
 
 /*
@@ -75,30 +87,29 @@ std::tm UniversalClock::to_tm(time_point t) noexcept
 
 
 I_Timer::I_Timer()
-#ifdef DEBUG
-:  last_update(time_point::clock::now())
-#endif // DEBUG
+:  _last_update(time_point::clock::now())
 {}
 
 I_Timer::~I_Timer()
 {}
 
-I_Timer::time_point I_Timer::max()
+I_Timer::time_point I_Timer::last_update() const
 {
-	return (time_point::max());
+	return (_last_update);
 }
-
-#ifdef DEBUG
 
 double I_Timer::progress(time_point date) const
 {
-	auto total = next_update() - last_update;
-	auto current = date - last_update;
+	auto total = next_update() - _last_update;
+	auto current = date - _last_update;
 
 	return (double(current.count()) / double(total.count()));
 }
 
-#endif // DEBUG
+I_Timer::time_point I_Timer::max()
+{
+	return (time_point::max());
+}
 
 
 
@@ -146,9 +157,7 @@ void Timer::update(UniversalClock::time_point date)
 	assert(_next_update <= date); // ensure we do need to update.
 	assert(_frequency == duration() || _next_update + _frequency > date); // ensure we did not missed a cycle.
 
-#ifdef DEBUG
-	last_update = _next_update;
-#endif // DEBUG
+	_last_update = _next_update;
 
 	if (_frequency == duration())
 		_next_update = time_point::max();
@@ -214,11 +223,7 @@ void Scheduler::update(time_point date)
 	{
 		it->get().update(date);
 
-		#ifdef DEBUG
-			if (last_update > _updatable.back().get().last_update)
-				last_update = _updatable.back().get().last_update;
-		#endif // DEBUG
-
+		_last_update = date;
 	}
 
 	sort();
@@ -273,10 +278,8 @@ void Scheduler::add(I_Timer & t)
 {
 	_updatable.push_back(t);
 
-#ifdef DEBUG
-	if (last_update > t.last_update)
-		last_update = t.last_update;
-#endif // DEBUG
+	if (_last_update > t.last_update())
+		_last_update = t.last_update();
 
 }
 
