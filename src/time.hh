@@ -133,29 +133,6 @@ private:
 
 
 
-/**
- * @brief [brief description]
- * @details [long description]
- * @exemple
- * @code{.cpp}
-	void exemple(time_point objective)
-	{
-		Scheduler scd;
-		Scheduler::iterator first, last;
-	
-		assert(scd.is_sorted());
-	
-		for (time_point intermediate = scd.can_adv_to(objective, first, last);
-			            intermediate <= objective;
-			            intermediate = scd.can_adv_to(objective, first, last)) {
-			for (; first != last; first++)
-				first->update(intermediate);
-			scd.sort();
-		}
-		scd.clean_dead_timer();
-	}
- * @endcode
- */
 class Scheduler : public I_Timer
 {
 public:
