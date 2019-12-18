@@ -1,6 +1,7 @@
 #include "logg.hh"
 
 #include "time.hh"
+#include "kepler.hh"
 
 #include "ux/Calandar.hh"
 #include "ui/Camera.hh"
@@ -86,32 +87,6 @@ int main(int, char const * const *, char const * const *)
 			ImGui::SFML::Update(window, sf::milliseconds(160));
 
 
-			// update logic
-			//colony.update(UniversalClock::last_tic(), UniversalClock::now());
-
-
-/*			// update imgui
-			if (ImGui::Begin("Colony")) {
-				ImGui::BulletText("name : %s", colony.name().c_str());
-
-				ImGui::SetNextWindowContentSize(ImVec2(0, 200));
-				ImGui::PlotHistogram("pop. distrib", colony._population_distrib.data(), colony._population_distrib.size(),
-					0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 600), sizeof(float));
-				ImGui::BulletText("sum %f", sum(colony._population_distrib));
-				//ImGui::BulletText("median %f", median(colony._population_distrib));
-				ImGui::BulletText("mean %f", mean(colony._population_distrib));
-				ImGui::BulletText("geometric_mean %f", geometric_mean(colony._population_distrib));
-
-
-				ImGui::DragInt("population", &colony.population());
-
-				ImGui::DragInt("population", &colony.population());
-				ImGui::DragFloat("population growth", &colony.population_growth());
-				ImGui::DragInt("gcd", &colony.gross_colonial_product());
-				ImGui::DragFloat("gcd growth", &colony.gross_colonial_product_growth());
-			}
-			ImGui::End();
-*/
 			debug_timer_ctrl();
 			calandar.display(scheduler);
 			display(camera);

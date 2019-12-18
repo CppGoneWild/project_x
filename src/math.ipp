@@ -249,7 +249,6 @@ static T _reduce_at_2pi(T x)
 
 
 
-
 template <class T, class U>
 template <class V, class W>
 Polar<T, U>::Polar(Polar<V, W> const & oth)
@@ -380,15 +379,16 @@ Vector<T> to_carthesian(Polar<U, V> const & p)
 template <class T, class U, class V>
 Polar<T, U> to_polar(Vector<V> const & v)
 {
+	assert(false);
 	Polar<T, U> res;
-	res.radius = std::hypot(v.x, v.y);
-
-	if (res.radius == 0)
-		res.theta = 0;
-	else if (v.y < 0)
-		res.theta = -(std::acos(v.x, res.radius));
-	else
-		res.theta = std::acos(v.x, res.radius);
-
+//	res.radius = std::hypot(v.x, v.y);
+//
+//	if (res.radius == 0)
+//		res.theta = 0;
+//	else if (v.y < 0)
+//		res.theta = -(std::acos2(v.x, res.radius));
+//	else
+//		res.theta = std::acos2(v.x, res.radius);
+//
 	return (res);
 }

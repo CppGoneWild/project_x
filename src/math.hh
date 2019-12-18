@@ -7,7 +7,7 @@
 #endif // _USE_MATH_DEFINES
 
 #include <cmath> // sqrt, hypot, fmod, M_PI, cos, acos, ...
-
+#include <cassert>
 
 
 /*
@@ -26,8 +26,8 @@ struct Vector
 {
 	using Type_t = T;
 
-	T x = 0;
-	T y = 0;
+	T x;
+	T y;
 
 	Vector() = default;
 	Vector(Vector<T> const &) = default;
@@ -119,8 +119,8 @@ double cross_product(Vector<T> const &, Vector<U> const &);
 template <class T, class U = double>
 struct Polar
 {
-	U theta = U(0);
-	T radius = T(0);
+	U theta;
+	T radius;
 
 	Polar() = default;
 	~Polar() = default;

@@ -43,8 +43,8 @@ public:
 	Orbit & operator=(Orbit const &) = default;
 	Orbit & operator=(Orbit &&)      = default;
 
-	Orbit(si::meters radius, si::seconds sidereal_period, si::time_point epoch = time_point());
-	template <class D, class T> Orbit(D, T, si::time_point = time_point());
+	Orbit(si::meters radius, si::seconds sidereal_period, si::time_point epoch = si::time_point());
+	template <class D, class T> Orbit(D, T, si::time_point = si::time_point());
 
 	si::polar_coord orbital_position(si::time_point) const;
 	si::carth_coord stellar_position(si::time_point) const;
@@ -67,7 +67,7 @@ private:
 
 
 template <class D, class T>
-Orbit::Orbit(D radius, T revolution, sens_t sens, si::time_point epoch)
+Orbit::Orbit(D radius, T revolution, si::time_point epoch)
 : Orbit(si::si_cast<si::meters>(radius),
 	      std::chrono::duration_cast<si::seconds>(revolution),
 	      epoch)
@@ -154,8 +154,8 @@ template <class D> OrbitalBody::OrbitalBody(Orbit const & o, OrbitalBody & aroun
 
 using System = std::vector<OrbitalBody *>;
 
-void add_to_system(System &, OrbitalBody & planet)
-void add_to_system(System &, OrbitalBody & moon, OrbitalBody const & planet)
+void add_to_system(System &, OrbitalBody & planet);
+void add_to_system(System &, OrbitalBody & moon, OrbitalBody const & planet);
 
 
 	

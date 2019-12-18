@@ -17,7 +17,6 @@
 #include <cmath> // sqrt, hypot, fmod, M_PI, cos, acos, ...
 
 
-
 namespace si
 {
 
@@ -84,7 +83,7 @@ public:
 	template <class REP_2 = REP> SI_Value<REP_2, TAG, std::ratio<1>> si() const;
 
 private:
-	REP _value = REP(0);
+	REP _value;
 };
 
 
@@ -140,9 +139,9 @@ using giga_meters = SI_Value<float,        distance_tag, std::giga>;
 using astronomical_units = SI_Value<float, distance_tag, std::ratio<149567870700>>;
 
 using light_second = SI_Value<float, distance_tag, std::ratio<299792458>>;
-using light_minute = SI_Value<float, distance_tag, std::ratio<299792458 * 60>>;
-using light_hour   = SI_Value<float, distance_tag, std::ratio<299792458 * 3600>>;
-using light_year   = SI_Value<float, distance_tag, std::ratio<9.4607e15>>;
+using light_minute = SI_Value<float, distance_tag, std::ratio<17987547480>>;
+using light_hour   = SI_Value<float, distance_tag, std::ratio<1079252848800>>;
+using light_year   = SI_Value<float, distance_tag, std::ratio<9460730472580800>>;
 
  
 
@@ -246,7 +245,7 @@ using years   = UniversalClock::years;
 
 
 struct speed_tag {};
-\using meters_per_second = SI_Value<std::int64_t, speed_tag>;
+using meters_per_second = SI_Value<std::int64_t, speed_tag>;
 
 using meters_per_hour = SI_Value<float, speed_tag, std::ratio<1, 3600>>;
 using meters_per_day  = SI_Value<float, speed_tag, std::ratio<1, 86400>>;
@@ -313,14 +312,14 @@ using carth_coord = SI_Value<Vector<meters>, carth_coord_tag>;
 
 
 template <class D>
-D::type_t get_x(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> const &);
+typename D::type_t get_x(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> const &);
 template <class D>
-D::type_t get_y(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> const &);
+typename D::type_t get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> const &);
 
 template <class D>
-D::type_t & get_x(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> &);
+typename D::type_t & get_x(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> &);
 template <class D>
-D::type_t & get_y(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> &);
+typename D::type_t & get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> &);
 
 
 
@@ -340,16 +339,16 @@ using polar_coord = SI_Value<Polar<meters, radians>, polar_coord_tag>;
 
 
 template <class D, class A, class R>
-D::type_t get_radius(SI_Value<Polar<D, radians>, polar_coord_tag, R> const &);
+typename D::type_t get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> const &);
 
 template <class D, class A, class R>
-A::type_t get_theta(SI_Value<Polar<D, radians>, polar_coord_tag, R> const &);
+typename A::type_t get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> const &);
 
 template <class D, class A, class R>
-D::type_t & get_radius(SI_Value<Polar<D, radians>, polar_coord_tag, R> &);
+typename D::type_t & get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> &);
 
 template <class D, class A, class R>
-A::type_t & get_theta(SI_Value<Polar<D, radians>, polar_coord_tag, R> &);
+typename A::type_t & get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> &);
 
 
 

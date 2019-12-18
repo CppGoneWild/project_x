@@ -19,19 +19,21 @@ kepler::Orbit::Orbit(si::meters radius, si::seconds sidereal_period, si::time_po
 
 si::polar_coord kepler::Orbit::orbital_position(si::time_point now) const
 {
-	if (_radius.value() == 0)
+	if (_radius.count() == 0)
 		return (si::polar_coord());
-	if (_period.as_seconds() == 0)
-		return (si::polar_coord(si::radians(), _radius));
+	if (_sidereal_period.count() == 0) {
+		Polar<si::meters, si::radians> tmp(si::radians(), _radius);
+		return (si::polar_coord(tmp));
+	}
 
 	auto elapsed_since_epoch = (now - _epoch).count() % _sidereal_period.count();
 
 	float angle = (float)(elapsed_since_epoch) * M_PI * 2.0;
-	angle /= (float)(_period.count());
+	angle /= (float)(_sidereal_period.count());
 
-	si::polar_coord position(si::radians(angle), _radius);
-	position.count().reduce();
-	return (position);
+	Polar<si::meters, si::radians> tmp(si::radians(angle), _radius);
+	// tmp.reduce();
+	return (si::polar_coord(tmp));
 }
 
 si::carth_coord kepler::Orbit::stellar_position(si::time_point now) const
@@ -83,16 +85,16 @@ si::time_point & kepler::Orbit::epoch()
 
 
 kepler::OrbitalBody::OrbitalBody(Orbit const & o, si::meters radius)
-: _radius(radius), _orbit(o), _satellite_of(nullptr),
+: _radius(radius), _orbit(o), _satellite_of(nullptr)
 {}
 
 kepler::OrbitalBody::OrbitalBody(Orbit const & o, OrbitalBody & around, si::meters radius)
-: _radius(radius), _orbit(o), _satellite_of(&around),
+: _radius(radius), _orbit(o), _satellite_of(&around)
 {}
 
-si::carth_coord stellar_position(si::time_point now) const
+si::carth_coord kepler::OrbitalBody::stellar_position(si::time_point now) const
 {
-	si::carth_coord res(orbit.stellar_position(now));
+	si::carth_coord res(_orbit.stellar_position(now));
 
 	if (is_satellite())
 		res += _satellite_of->stellar_position(now);

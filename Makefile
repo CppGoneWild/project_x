@@ -17,6 +17,8 @@ SRC = external/ImGui/imgui-SFML.cpp \
       \
       src/ux/Calandar.cpp \
       \
+      src/kepler.cpp \
+      src/si.cpp \
       src/time.cpp \
       src/main.cpp
 
