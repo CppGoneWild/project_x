@@ -13,139 +13,206 @@
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 SI_Value<REP, TAG, RATIO>::SI_Value(SI_Value<REP_2, TAG, RATIO_2> const & oth)
+: _value(oth.count())
 {}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 SI_Value<REP, TAG, RATIO>::SI_Value(SI_Value<REP_2, TAG, RATIO_2> && oth)
+: _value(oth.count())
 {}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 SI_Value<REP, TAG, RATIO> & SI_Value<REP, TAG, RATIO>::operator=(SI_Value<REP_2, TAG, RATIO_2> const & oth)
-{}
+{
+	_value = oth.count();
+	return (*this);
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 SI_Value<REP, TAG, RATIO> & SI_Value<REP, TAG, RATIO>::operator=(SI_Value<REP_2, TAG, RATIO_2> && oth)
-{}
+{
+	_value = oth.count();
+	return (*this);
+}
 
 template <class REP, class TAG, class RATIO>
 SI_Value<REP, TAG, RATIO>::SI_Value(REP value)
+: _value(value)
 {}
 
 template <class REP, class TAG, class RATIO>
 REP SI_Value<REP, TAG, RATIO>::count() const
-{}
+{
+	return (_value);
+}
 
 template <class REP, class TAG, class RATIO>
-void SI_Value<REP, TAG, RATIO>::count(REP value)
-{}
+REP & SI_Value<REP, TAG, RATIO>::count()
+{
+	return (_value);
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 bool SI_Value<REP, TAG, RATIO>::operator==(SI_Value<REP_2, TAG, RATIO_2> const & oth) const
-{}
+{
+	return (_value == oth.count());
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 bool SI_Value<REP, TAG, RATIO>::operator!=(SI_Value<REP_2, TAG, RATIO_2> const & oth) const
-{}
+{
+	return (_value != oth.count());
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 bool SI_Value<REP, TAG, RATIO>::operator< (SI_Value<REP_2, TAG, RATIO_2> const & oth) const
-{}
+{
+	return (_value <  oth.count());
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 bool SI_Value<REP, TAG, RATIO>::operator> (SI_Value<REP_2, TAG, RATIO_2> const & oth) const
-{}
+{
+	return (_value >  oth.count());
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 bool SI_Value<REP, TAG, RATIO>::operator<=(SI_Value<REP_2, TAG, RATIO_2> const & oth) const
-{}
+{
+	return (_value <= oth.count());
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 bool SI_Value<REP, TAG, RATIO>::operator>=(SI_Value<REP_2, TAG, RATIO_2> const & oth) const
-{}
+{
+	return (_value >= oth.count());
+}
 
 template <class REP, class TAG, class RATIO>
 void SI_Value<REP, TAG, RATIO>::operator+=(REP value)
-{}
+{
+	_value += value;
+}
 
 template <class REP, class TAG, class RATIO>
 void SI_Value<REP, TAG, RATIO>::operator-=(REP value)
-{}
+{
+	_value -= value;
+}
 
 template <class REP, class TAG, class RATIO>
 void SI_Value<REP, TAG, RATIO>::operator*=(REP value)
-{}
+{
+	_value *= value;
+}
 
 template <class REP, class TAG, class RATIO>
 void SI_Value<REP, TAG, RATIO>::operator/=(REP value)
-{}
+{
+	_value /= value;
+}
 
 template <class REP, class TAG, class RATIO>
 void SI_Value<REP, TAG, RATIO>::operator%=(REP value)
-{}
+{
+	_value %= value;
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 void SI_Value<REP, TAG, RATIO>::operator+=(SI_Value<REP_2, TAG, RATIO_2> const & oth)
-{}
+{
+	_value += oth.count();
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 void SI_Value<REP, TAG, RATIO>::operator-=(SI_Value<REP_2, TAG, RATIO_2> const & oth)
-{}
+{
+	_value -= oth.count();
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 void SI_Value<REP, TAG, RATIO>::operator*=(SI_Value<REP_2, TAG, RATIO_2> const & oth)
-{}
+{
+	_value *= oth.count();
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 void SI_Value<REP, TAG, RATIO>::operator/=(SI_Value<REP_2, TAG, RATIO_2> const & oth)
-{}
+{
+	_value /= oth.count();
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2, class RATIO_2>
 void SI_Value<REP, TAG, RATIO>::operator%=(SI_Value<REP_2, TAG, RATIO_2> const & oth)
-{}
+{
+	_value %= oth.count();
+}
 
 template <class REP, class TAG, class RATIO>
 template <class U>
 SI_Value<REP, TAG, RATIO> SI_Value<REP, TAG, RATIO>::operator+(U const & oth) const
-{}
+{
+	SI_Value<REP, TAG, RATIO> res(*this);
+	res += oth;
+	return (res);
+}
 
 template <class REP, class TAG, class RATIO>
 template <class U>
 SI_Value<REP, TAG, RATIO> SI_Value<REP, TAG, RATIO>::operator-(U const & oth) const
-{}
+{
+	SI_Value<REP, TAG, RATIO> res(*this);
+	res -= oth;
+	return (res);
+}
 
 template <class REP, class TAG, class RATIO>
 template <class U>
 SI_Value<REP, TAG, RATIO> SI_Value<REP, TAG, RATIO>::operator*(U const & oth) const
-{}
+{
+	SI_Value<REP, TAG, RATIO> res(*this);
+	res *= oth;
+	return (res);
+}
 
 template <class REP, class TAG, class RATIO>
 template <class U>
 SI_Value<REP, TAG, RATIO> SI_Value<REP, TAG, RATIO>::operator/(U const & oth) const
-{}
+{
+	SI_Value<REP, TAG, RATIO> res(*this);
+	res /= oth;
+	return (res);
+}
 
 template <class REP, class TAG, class RATIO>
 template <class U>
 SI_Value<REP, TAG, RATIO> SI_Value<REP, TAG, RATIO>::operator%(U const & oth) const
-{}
+{
+	SI_Value<REP, TAG, RATIO> res(*this);
+	res %= oth;
+	return (res);
+}
 
 template <class REP, class TAG, class RATIO>
 template <class REP_2>
 SI_Value<REP_2, TAG, std::ratio<1>> SI_Value<REP, TAG, RATIO>::si() const
-{}
+{
+	return si_cast<SI_Value<REP_2, TAG, std::ratio<1>>>(*this); 
+}
 
 
 
@@ -333,9 +400,9 @@ carth_coord si_cast<carth_coord, Polar<meters, radians>, polar_coord_tag, std::r
 {
 	carth_coord res;
 
-	if (s.count().radius != meters(0)) {
-		res.count().x = s.count().radius * std::cos(s.count().theta);
-		res.count().y = s.count().radius * std::sin(s.count().theta);
+	if (s.count().radius.count() != meters(0)) {
+		res.count().x.count() = s.count().radius.count() * std::cos(s.count().theta.count());
+		res.count().y.count() = s.count().radius.count() * std::sin(s.count().theta.count());
 	}
 
 	return (res);
@@ -345,14 +412,14 @@ template <>
 polar_coord si_cast<polar_coord, Vector<meters>, carth_coord_tag, std::ratio<1>>(carth_coord s)
 {
 	polar_coord res;
-	res.count().radius = std::hypot(s.count().x, s.count().y);
+	res.count().radius.count() = std::hypot(s.count().x.count(), s.count().y.count());
 
-	if (res.count().radius == 0)
-		res.count().theta = 0;
-	else if (s.count().y < 0)
-		res.count().theta = -(std::acos(s.count().x, res.count().radius));
+	if (res.count().radius.count() == 0)
+		res.count().theta.count() = 0;
+	else if (s.count().y.count() < 0)
+		res.count().theta.count() = -(std::acos(s.count().x.count(), res.count().radius.count()));
 	else
-		res.count().theta = std::acos(s.count().x, res.count().radius);
+		res.count().theta.count() = std::acos(s.count().x.count(), res.count().radius.count());
 
 	return (res);
 }

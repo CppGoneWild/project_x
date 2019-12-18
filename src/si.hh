@@ -47,7 +47,7 @@ public:
 	explicit SI_Value(REP);
 
 	REP count() const;
-	void count(REP);
+	REP & count();
 
 	template <class REP_2, class RATIO_2> bool operator==(SI_Value<REP_2, TAG, RATIO_2> const &) const;
 	template <class REP_2, class RATIO_2> bool operator!=(SI_Value<REP_2, TAG, RATIO_2> const &) const;
@@ -125,6 +125,7 @@ TO_SI si_cast(SI_Value<REP, TAG, RATIO>);
 
 struct distance_tag {};
 using meters      = SI_Value<std::int64_t, distance_tag, std::ratio<1>>;
+
 using kilo_meters = SI_Value<float,        distance_tag, std::kilo>;
 using mega_meters = SI_Value<float,        distance_tag, std::mega>;
 using giga_meters = SI_Value<float,        distance_tag, std::giga>;
