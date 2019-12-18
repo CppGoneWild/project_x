@@ -81,7 +81,7 @@ std::string UniversalClock::to_string(time_point t)
 }
 
 template <class D>
-D to_integer_duration(D d)
+static D to_integer_duration(D d)
 {
 	return (D(int(d.count())));
 }

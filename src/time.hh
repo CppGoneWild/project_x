@@ -4,15 +4,30 @@
 
 
 #include <list>
+#include <functional> // reference_wrapper
+
+#include <string>
+#include <sstream>    // serialisation (sstring + setprecision)
+#include <iomanip>    // setprecision
+
 #include <cstdint>
+
 #include <ratio>
 #include <chrono>
 #include <ctime>      // struct tm;
-#include <functional> // reference_wrapper
-#include <sstream>
-#include <iomanip>    // setprecision
-#include <string>
+
 #include <cassert>
+
+
+
+/*
+          __  __      _                            __________           __
+         / / / /___  (_)   _____  ______________ _/ / ____/ /___  _____/ /__
+        / / / / __ \/ / | / / _ \/ ___/ ___/ __ `/ / /   / / __ \/ ___/ //_/
+       / /_/ / / / / /| |/ /  __/ /  (__  ) /_/ / / /___/ / /_/ / /__/ ,<
+       \____/_/ /_/_/ |___/\___/_/  /____/\__,_/_/\____/_/\____/\___/_/|_|
+       
+*/
 
 
 
@@ -70,6 +85,18 @@ private:
 
 
 
+/*
+                       ____   _______
+                      /  _/  /_  __(_)___ ___  ___  _____
+                      / /     / / / / __ `__ \/ _ \/ ___/
+                    _/ /     / / / / / / / / /  __/ /
+                   /___/____/_/ /_/_/ /_/ /_/\___/_/
+                      /_____/
+
+*/
+
+
+
 class I_Timer
 {
 public:
@@ -97,6 +124,17 @@ protected:
 
 	time_point _last_update;
 };
+
+
+
+/*
+                          _______
+                         /_  __(_)___ ___  ___  _____
+                          / / / / __ `__ \/ _ \/ ___/
+                         / / / / / / / / /  __/ /
+                        /_/ /_/_/ /_/ /_/\___/_/
+                        
+*/
 
 
 
@@ -130,6 +168,17 @@ private:
 	duration _frequency;
 	time_point _next_update;
 };
+
+
+
+/*
+                  _____      __             __      __
+                 / ___/_____/ /_  ___  ____/ /_  __/ /__  _____
+                 \__ \/ ___/ __ \/ _ \/ __  / / / / / _ \/ ___/
+                ___/ / /__/ / / /  __/ /_/ / /_/ / /  __/ /
+               /____/\___/_/ /_/\___/\__,_/\__,_/_/\___/_/
+               
+*/
 
 
 
