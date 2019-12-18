@@ -58,16 +58,13 @@ int main(int, char const * const *, char const * const *)
 	ux::Calandar calandar;
 
 
-	//Timer every_day(UniversalClock::days(1), UniversalClock::now());
+	Scheduler scheduler;
 	Timer every_week(UniversalClock::days(7), UniversalClock::now());
 	Timer every_month(UniversalClock::months(1), UniversalClock::now());
-	Timer single_shot(UniversalClock::now() + UniversalClock::duration(100000));
-	Scheduler scheduler;
-	//scheduler.add(every_day);
 	scheduler.add(every_week);
 	scheduler.add(every_month);
-	scheduler.add(single_shot);
 	scheduler.sort();
+
 
 	COUT_INFO << "Main loop start";
 
@@ -118,14 +115,6 @@ int main(int, char const * const *, char const * const *)
 			debug_timer_ctrl();
 			calandar.display(scheduler);
 			display(camera);
-
-			if (ImGui::Begin("timer")) {
-				//ImGui::ProgressBar(every_day.progress(UniversalClock::now()));
-				ImGui::ProgressBar(every_week.progress(UniversalClock::now()));
-				ImGui::ProgressBar(every_month.progress(UniversalClock::now()));
-				ImGui::ProgressBar(single_shot.progress(UniversalClock::now()));
-			}
-			ImGui::End();
 		}
 
 		ImGui::ShowDemoWindow();
