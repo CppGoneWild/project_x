@@ -13,12 +13,6 @@ SRC = external/ImGui/imgui-SFML.cpp \
       external/logg/StreamOutput.cpp \
       external/logg/Timer.cpp \
       \
-      external/serializer/File.cpp \
-      external/serializer/LineBuffer.cpp \
-      external/serializer/Parser.cpp \
-      external/serializer/Tokenizer.cpp \
-      external/serializer/Tree.cpp \
-      \
       src/ux/Calandar.cpp \
       \
       src/time.cpp \
