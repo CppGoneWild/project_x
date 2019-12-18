@@ -23,7 +23,7 @@ OBJ = $(SRC:.cpp=.o)
 INCLUDE_SFML_FLAGS =
 INCLUDE_OTHER_FLAGS = -Isrc/ -Iexternal/ -Iexternal/ImGui
 WARNING_FLAGS = -Wall -Wextra
-DEBUG_FLAGS = -g -DDEBUG
+DEBUG_FLAGS = -g
 
 LD_SFML_FLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 LD_IMGUI_FLAGS = -lGL
