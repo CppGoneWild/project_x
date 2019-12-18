@@ -269,13 +269,14 @@ TO_SI si_cast(SI_Value<REP, TAG, RATIO> s)
 
 
 
-template <class D1, class D2>
-square_meters make_surface(D1 lenght, D2 width)
+template <class S, class D1, class D2>
+S make_surface(D1 lenght, D2 width)
 {
 	auto l_as_m = si_cast<meters>(lenght).count();
 	auto w_as_m = si_cast<meters>(width).count();
+	meters2 m2(l_as_m * w_as_m);
 
-	return (square_meters(l_as_m * w_as_m));
+	return (si_cast<S>(m2));
 }
 
 
@@ -286,23 +287,25 @@ square_meters make_surface(D1 lenght, D2 width)
 
 
 
-template <class D1, class D2, class D3>
-cubic_meters make_volume(D1 lenght, D2 width, D3 toto)
+template <class V, class D1, class D2, class D3>
+V make_volume(D1 lenght, D2 width, D3 toto)
 {
 	auto l_as_m = si_cast<meters>(lenght).count();
 	auto w_as_m = si_cast<meters>(width).count();
 	auto t_as_m = si_cast<meters>(toto).count();
+	meters3 m3(l_as_m * w_as_m * t_as_m);
 
-	return (cubic_meters(l_as_m * w_as_m * t_as_m));
+	return (si_cast<V>(m3));
 }
 
-template <class D, class S>
-cubic_meters make_volume(D lenght, S surface)
+template <class V, class D, class S>
+V make_volume(D lenght, S surface)
 {
 	auto l_as_m = si_cast<meters>(lenght).count();
 	auto s_as_sm = si_cast<squaremeters>(surface).count();
+	meters3 m3(l_as_m * s_as_sm);
 
-	return (cubic_meters(l_as_m * s_as_sm));
+	return (si_cast<V>(m3));
 }
 
 
@@ -314,12 +317,12 @@ cubic_meters make_volume(D lenght, S surface)
 
 
 template <class M, class V>
-kilogramm_by_cubicmeters make_mass_volumic(M mass, V vol)
+kg_by_meters3 make_mass_volumic(M mass, V vol)
 {
 	auto m_as_k = si_cast<kilogramms>(mass).count();
 	auto v_as_cm = si_cast<cubemeters>(vol).count();
 
-	return (kilogramm_by_cubicmeters(m_as_k * v_as_cm));
+	return (kg_by_meters3(m_as_k * v_as_cm));
 }
 
 
@@ -330,8 +333,17 @@ kilogramm_by_cubicmeters make_mass_volumic(M mass, V vol)
 
 
 
-template <> radians si_cast<radians, float, degree_tag, std::ratio<1>>(degrees s) { return (radians(s.count() * M_PI / 180.0)); }
-template <> degrees si_cast<degrees, float, radian_tag, std::ratio<1>>(radians s) { return (degrees(s.count() * 180.0 / M_PI)); }
+template <>
+radians si_cast<radians, float, degree_tag, std::ratio<1>>(degrees s)
+{
+	return (radians(s.count() * M_PI / 180.0));
+}
+
+template <>
+degrees si_cast<degrees, float, radian_tag, std::ratio<1>>(radians s)
+{
+	return (degrees(s.count() * 180.0 / M_PI));
+}
 
 
 
@@ -348,6 +360,7 @@ S make_speed(D d, T t)
 	auto as_seconds = std::chrono::duration_cast<seconds>(t).count() * S::ratio_t::den;
 	return (S(as_meters / as_seconds));
 }
+
 
 
 
@@ -374,17 +387,29 @@ acceleration make_acceleration(D d, T t)
 
 
 template <class T>
-radians_per_second make_angular_speed(radian_t angle, T t)
+rad_per_second make_angular_speed(radian_t angle, T t)
 {
 	auto as_seconds = std::chrono::duration_cast<seconds>(t).count();
-	return (radians_per_second(angle / as_seconds));
+	return (rad_per_second(angle / as_seconds));
 }
 
 template <class T>
-degrees_per_second make_angular_speed(degrees angle, T t)
+deg_per_second make_angular_speed(degrees angle, T t)
 {
 	auto as_seconds = std::chrono::duration_cast<seconds>(t).count();
-	return (radians_per_second(angle / as_seconds));
+	return (rad_per_second(angle / as_seconds));
+}
+
+template <>
+rad_per_second si_cast<rad_per_second, float, deg_speed_tag, std::ratio<1>>(deg_per_second s)
+{
+	return (rad_per_second(s.count() * M_PI / 180.0));
+}
+
+template <>
+deg_per_second si_cast<deg_per_second, float, rad_speed_tag, std::ratio<1>>(rad_per_second s)
+{
+	return (deg_per_second(s.count() * 180.0 / M_PI));
 }
 
 
@@ -395,31 +420,95 @@ degrees_per_second make_angular_speed(degrees angle, T t)
 
 
 
+// helpers for carthesian composante direct access
+
+
+
+template <class D>
+D::type_t get_x(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> const & v)
+{
+	return (v.count().x().count());
+}
+
+template <class D>
+D::type_t get_y(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> const & v)
+{
+	return (v.count().y().count());
+}
+
+template <class D>
+D::type_t & get_x(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> & v)
+{
+	return (v.count().x().count());
+}
+
+template <class D>
+D::type_t & get_y(SI_Value<Vector<D>, carth_coord_tag, D::ratio_t> & v)
+{
+	return (v.count().y().count());
+}
+
+
+
+// helpers for polar composante direct access
+
+
+
+template <class D, class A, class R>
+D::type_t get_radius(SI_Value<Polar<D, radians>, polar_coord_tag, R> const & p)
+{
+	return (p.count().radius.count());
+}
+
+template <class D, class A, class R>
+A::type_t get_theta(SI_Value<Polar<D, radians>, polar_coord_tag, R> const & p)
+{
+	return (p.count().theta.count());
+}
+
+template <class D, class A, class R>
+D::type_t & get_radius(SI_Value<Polar<D, radians>, polar_coord_tag, R> & p)
+{
+	return (p.count().radius.count());
+}
+
+template <class D, class A, class R>
+A::type_t & get_theta(SI_Value<Polar<D, radians>, polar_coord_tag, R> & p)
+{
+	return (p.count().theta.count());
+}
+
+
+
+// cast from polar/carthesian to polar/carthesian
+
+
+
 template <>
-carth_coord si_cast<carth_coord, Polar<meters, radians>, polar_coord_tag, std::ratio<1>>(polar_coord s)
+carth_coord si_cast<carth_coord, polar_coord::type_t, polar_coord::tag_t, polar_coord::ratio_t>(polar_coord s)
 {
 	carth_coord res;
 
-	if (s.count().radius.count() != meters(0)) {
-		res.count().x.count() = s.count().radius.count() * std::cos(s.count().theta.count());
-		res.count().y.count() = s.count().radius.count() * std::sin(s.count().theta.count());
+	if (get_radius(s) != meters(0)) {
+		get_x(res) = get_radius(s) * std::cos(get_theta(s));
+		get_y(res) = get_radius(s) * std::sin(get_theta(s));
 	}
 
 	return (res);
 }
 
 template <>
-polar_coord si_cast<polar_coord, Vector<meters>, carth_coord_tag, std::ratio<1>>(carth_coord s)
+polar_coord si_cast<polar_coord, carth_coord::type_t, carth_coord::tag_t, carth_coord::ratio_t>(carth_coord s)
 {
 	polar_coord res;
-	res.count().radius.count() = std::hypot(s.count().x.count(), s.count().y.count());
+	get_radius(res) = std::hypot(get_x(s), get_y(s));
 
-	if (res.count().radius.count() == 0)
-		res.count().theta.count() = 0;
-	else if (s.count().y.count() < 0)
-		res.count().theta.count() = -(std::acos(s.count().x.count(), res.count().radius.count()));
+	if (get_radius(res) == 0)
+		get_theta(res) = 0;
+	else if (get_y(s) < 0)
+		get_theta(res) = -(std::acos(get_x(s), get_radius(res)));
 	else
-		res.count().theta.count() = std::acos(s.count().x.count(), res.count().radius.count());
+		get_theta(res) = std::acos(get_x(s), get_radius(res));
 
 	return (res);
 }
