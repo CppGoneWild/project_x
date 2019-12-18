@@ -3,9 +3,16 @@
 
 
 
+#ifndef   _USE_MATH_DEFINES
+#define   _USE_MATH_DEFINES // for M_PI
+#endif // _USE_MATH_DEFINES
+
+
+
 #include "si.hh"
 
 #include <vector>
+#include <cmath> // sqrt, hypot, fmod, M_PI, cos, acos, ...
 
 
 

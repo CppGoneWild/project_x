@@ -3,11 +3,18 @@
 
 
 
+#ifndef   _USE_MATH_DEFINES
+#define   _USE_MATH_DEFINES // for M_PI
+#endif // _USE_MATH_DEFINES
+
+
+
 #include "math.hh"
 #include "time.hh"
 
 #include <cstdint>
 #include <ratio>
+#include <cmath> // sqrt, hypot, fmod, M_PI, cos, acos, ...
 
 
 
