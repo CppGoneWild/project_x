@@ -37,7 +37,7 @@ public:
 	Orbit & operator=(Orbit &&)      = default;
 
 	Orbit(si::meters radius, si::seconds sidereal_period, si::time_point epoch = time_point());
-	template <class D> Orbit(si::meters, D sidereal_period, si::time_point = time_point());
+	template <class D, class T> Orbit(D, T, si::time_point = time_point());
 
 	si::polar_coord orbital_position(si::time_point) const;
 	si::carth_coord stellar_position(si::time_point) const;
@@ -83,8 +83,6 @@ Orbit::Orbit(D radius, T revolution, sens_t sens, si::time_point epoch)
 class OrbitalBody
 {
 public:
-	using satellites_t = std::vector<OrbitalBody *>;
-
 	OrbitalBody() = default;
 
 	OrbitalBody(OrbitalBody const &);
@@ -96,6 +94,9 @@ public:
 
 	OrbitalBody(Orbit const &, si::meters radius); ///<around nothing
 	OrbitalBody(Orbit const &, OrbitalBody & around, si::meters radius);
+
+	template <class D> OrbitalBody(Orbit const &, D radius);
+	template <class D> OrbitalBody(Orbit const &, OrbitalBody & around, D radius);
 
 	/**
 	 * @brief relative to star.
@@ -120,6 +121,16 @@ private:
 
 	OrbitalBody * _satellite_of = nullptr;
 };
+
+
+
+template <class D> OrbitalBody::OrbitalBody(Orbit const & o, D radius)
+: OrbitalBody(o, si::si_cast<si::meters>(radius))
+{}
+
+template <class D> OrbitalBody::OrbitalBody(Orbit const & o, OrbitalBody & around, D radius)
+: OrbitalBody(o, around, si::si_cast<si::meters>(radius))
+{}
 
 
 
