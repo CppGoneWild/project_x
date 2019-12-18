@@ -100,19 +100,17 @@ private:
 class I_Timer
 {
 public:
-	using time_point = UniversalClock::time_point;
-
 	virtual ~I_Timer();
 
-	virtual time_point next_update() const = 0;
-	virtual time_point next_next_update() const = 0;
-	virtual void update(time_point date) = 0;
+	virtual UniversalClock::time_point next_update() const = 0;
+	virtual UniversalClock::time_point next_next_update() const = 0;
+	virtual void update(UniversalClock::time_point date) = 0;
 
-	double progress(time_point date) const;
+	double progress(UniversalClock::time_point date) const;
 
-	static time_point max();
+	static UniversalClock::time_point max();
 
-	time_point last_update() const;
+	UniversalClock::time_point last_update() const;
 
 protected:
 	I_Timer();
@@ -122,7 +120,7 @@ protected:
 	I_Timer & operator=(I_Timer const &) = default;
 	I_Timer & operator=(I_Timer &&)      = default;
 
-	time_point _last_update;
+	UniversalClock::time_point _last_update;
 };
 
 
@@ -141,8 +139,6 @@ protected:
 class Timer : public I_Timer
 {
 public:
-	using duration   = UniversalClock::duration;
-
 	Timer()                   = default;
 	Timer(Timer const &)      = default;
 	Timer(Timer &&)           = default;
@@ -151,22 +147,22 @@ public:
 	Timer & operator=(Timer const &) = default;
 	Timer & operator=(Timer &&)      = default;
 
-	explicit Timer(time_point next_update); // single shot mode
-	Timer(duration frequency, time_point current_time);
-	template <class D> Timer(D frequency, time_point current_time);
+	explicit Timer(UniversalClock::time_point next_update); // single shot mode
+	Timer(UniversalClock::duration frequency, UniversalClock::time_point current_time);
+	template <class D> Timer(D frequency, UniversalClock::time_point current_time);
 
-	virtual time_point next_update() const override;
-	virtual time_point next_next_update() const override;
-	time_point & next_update();
+	virtual UniversalClock::time_point next_update() const override;
+	virtual UniversalClock::time_point next_next_update() const override;
+	UniversalClock::time_point & next_update();
 
-	duration frequency() const;
-	duration & frequency();
+	UniversalClock::duration frequency() const;
+	UniversalClock::duration & frequency();
 
-	virtual void update(time_point date) override;
+	virtual void update(UniversalClock::time_point date) override;
 
 private:
-	duration _frequency;
-	time_point _next_update;
+	UniversalClock::duration _frequency;
+	UniversalClock::time_point _next_update;
 };
 
 
@@ -197,13 +193,13 @@ public:
 	Scheduler(Scheduler &&)       = default;
 	virtual ~Scheduler() override = default;
 
-	virtual time_point next_update() const override;
-	virtual time_point next_next_update() const override;
-	virtual void update(time_point date) override;
+	virtual UniversalClock::time_point next_update() const override;
+	virtual UniversalClock::time_point next_next_update() const override;
+	virtual void update(UniversalClock::time_point date) override;
 
-	time_point can_adv_to(time_point date) const;
+	UniversalClock::time_point can_adv_to(UniversalClock::time_point date) const;
 
-	void advance_until(time_point date);
+	void advance_until(UniversalClock::time_point date);
 	void advance_until(UniversalClock::duration delta);
 	template <class D> void advance_until(D delta);
 

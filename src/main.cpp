@@ -1,8 +1,10 @@
 #include "logg.hh"
 
-#include "ux/Calandar.hh"
-
 #include "time.hh"
+
+#include "ux/Calandar.hh"
+#include "ui/Camera.hh"
+
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -42,6 +44,10 @@ int main(int, char const * const *, char const * const *)
 	sf::RenderWindow window;
 	window.create(sf::VideoMode(1900, 900), "project_x");
 	window.setFramerateLimit(60);
+
+	ui::Camera camera(window);
+	camera.set_center(0, 0);
+	camera.set_pixel_in_meter(328311616);
 
 
 	// imgui
@@ -111,6 +117,7 @@ int main(int, char const * const *, char const * const *)
 */
 			debug_timer_ctrl();
 			calandar.display(scheduler);
+			display(camera);
 
 			if (ImGui::Begin("timer")) {
 				//ImGui::ProgressBar(every_day.progress(UniversalClock::now()));
@@ -126,6 +133,7 @@ int main(int, char const * const *, char const * const *)
 
 
 		// render sfml
+		window.setView(camera.get_view());
 		window.clear(sf::Color::Black);
 
 

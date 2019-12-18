@@ -13,6 +13,8 @@ SRC = external/ImGui/imgui-SFML.cpp \
       external/logg/StreamOutput.cpp \
       external/logg/Timer.cpp \
       \
+      src/ui/Camera.cpp \
+      \
       src/ux/Calandar.cpp \
       \
       src/time.cpp \

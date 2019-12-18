@@ -32,8 +32,8 @@ std::string UniversalClock::to_string(std::chrono::duration<REP, PERIOD> d)
 
 
 template <class D>
-Timer::Timer(D frequency, time_point current_time)
-: Timer(std::chrono::duration_cast<duration>(frequency), current_time)
+Timer::Timer(D frequency, UniversalClock::time_point current_time)
+: Timer(std::chrono::duration_cast<UniversalClock::duration>(frequency), current_time)
 {}
 
 

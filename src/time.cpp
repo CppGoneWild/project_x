@@ -124,18 +124,18 @@ std::string UniversalClock::to_string(duration d)
 
 
 I_Timer::I_Timer()
-:  _last_update(time_point::clock::now())
+:  _last_update(UniversalClock::now())
 {}
 
 I_Timer::~I_Timer()
 {}
 
-I_Timer::time_point I_Timer::last_update() const
+UniversalClock::time_point I_Timer::last_update() const
 {
 	return (_last_update);
 }
 
-double I_Timer::progress(time_point date) const
+double I_Timer::progress(UniversalClock::time_point date) const
 {
 	auto total = next_update() - _last_update;
 	auto current = date - _last_update;
@@ -143,9 +143,9 @@ double I_Timer::progress(time_point date) const
 	return (double(current.count()) / double(total.count()));
 }
 
-I_Timer::time_point I_Timer::max()
+UniversalClock::time_point I_Timer::max()
 {
-	return (time_point::max());
+	return (UniversalClock::time_point::max());
 }
 
 
@@ -160,38 +160,38 @@ I_Timer::time_point I_Timer::max()
 
 
 
-Timer::Timer(time_point next_update)
+Timer::Timer(UniversalClock::time_point next_update)
 : I_Timer(), _frequency(), _next_update(next_update)
 {}
 
-Timer::Timer(duration frequency, time_point current_time)
+Timer::Timer(UniversalClock::duration frequency, UniversalClock::time_point current_time)
 : I_Timer(), _frequency(frequency), _next_update(current_time + _frequency)
 {
-	assert(_frequency != duration()); // use single shot mode
+	assert(_frequency != UniversalClock::duration()); // use single shot mode
 	_last_update = current_time;
 }
 
-I_Timer::time_point Timer::next_update() const
+UniversalClock::time_point Timer::next_update() const
 {
 	return (_next_update);
 }
 
-I_Timer::time_point Timer::next_next_update() const
+UniversalClock::time_point Timer::next_next_update() const
 {
-	return (_frequency == duration() ? I_Timer::max() : _next_update + _frequency);
+	return (_frequency == UniversalClock::duration() ? I_Timer::max() : _next_update + _frequency);
 }
 
-I_Timer::time_point & Timer::next_update()
+UniversalClock::time_point & Timer::next_update()
 {
 	return (_next_update);
 }
 
-Timer::duration Timer::frequency() const
+UniversalClock::duration Timer::frequency() const
 {
 	return (_frequency);
 }
 
-Timer::duration & Timer::frequency()
+UniversalClock::duration & Timer::frequency()
 {
 	return (_frequency);
 }
@@ -199,12 +199,12 @@ Timer::duration & Timer::frequency()
 void Timer::update(UniversalClock::time_point date)
 {
 	assert(_next_update <= date); // ensure we do need to update.
-	assert(_frequency == duration() || _next_update + _frequency > date); // ensure we did not missed a cycle.
+	assert(_frequency == UniversalClock::duration() || _next_update + _frequency > date); // ensure we did not missed a cycle.
 
 	_last_update = _next_update;
 
-	if (_frequency == duration())
-		_next_update = time_point::max();
+	if (_frequency == UniversalClock::duration())
+		_next_update = UniversalClock::time_point::max();
 	else
 		_next_update += _frequency;
 }
@@ -235,18 +235,18 @@ struct I_Timer_less
 
 
 
-I_Timer::time_point Scheduler::next_update() const
+UniversalClock::time_point Scheduler::next_update() const
 {
 	assert(is_sorted());
 
 	return (_updatable.empty() ? I_Timer::max() : _updatable.back().get().next_update());
 }
 
-I_Timer::time_point Scheduler::next_next_update() const
+UniversalClock::time_point Scheduler::next_next_update() const
 {
 	assert(is_sorted());
 
-	time_point res = I_Timer::max();
+	UniversalClock::time_point res = I_Timer::max();
 
 	for(auto it = _updatable.rbegin(); it != _updatable.rend(); ++it) {
 		if (it->get().next_next_update() < res)
@@ -258,7 +258,7 @@ I_Timer::time_point Scheduler::next_next_update() const
 	return (res);
 }
 
-void Scheduler::update(time_point date)
+void Scheduler::update(UniversalClock::time_point date)
 {
 	assert(is_sorted());
 	assert(next_update() <= date);
@@ -276,12 +276,12 @@ void Scheduler::update(time_point date)
 	clean_dead_timer();
 }
 
-Scheduler::time_point Scheduler::can_adv_to(time_point date) const
+UniversalClock::time_point Scheduler::can_adv_to(UniversalClock::time_point date) const
 {
 	assert(is_sorted());
 
 	if (_updatable.empty() || _updatable.back().get().next_update() > date)
-		return (time_point::max());
+		return (UniversalClock::time_point::max());
 
 	// ensure we will not miss a cycle
 	auto next_date = _updatable.back().get().next_update();
@@ -299,15 +299,15 @@ Scheduler::time_point Scheduler::can_adv_to(time_point date) const
 	return (next_date);
 }
 
-void Scheduler::advance_until(time_point date)
+void Scheduler::advance_until(UniversalClock::time_point date)
 {
 	auto intermediate = can_adv_to(date);
-	for (; intermediate <= date && intermediate != time_point::max();
+	for (; intermediate <= date && intermediate != UniversalClock::time_point::max();
 		 intermediate = can_adv_to(date)) {
 		UniversalClock::advance(intermediate - UniversalClock::now());
 		update(intermediate);
 	}
-	if (intermediate == time_point::max() && UniversalClock::now() < date)
+	if (intermediate == UniversalClock::time_point::max() && UniversalClock::now() < date)
 		UniversalClock::advance(date - UniversalClock::now());	
 }
 
