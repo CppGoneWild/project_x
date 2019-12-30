@@ -22,7 +22,7 @@ si::polar_coord kepler::Orbit::orbital_position(si::time_point now) const
 	if (_radius.count() == 0)
 		return (si::polar_coord());
 	if (_sidereal_period.count() == 0) {
-		Polar<si::meters, si::radians> tmp(si::radians(), _radius);
+		Polar<std::int64_t> tmp(0.0, _radius.count());
 		return (si::polar_coord(tmp));
 	}
 
@@ -31,7 +31,7 @@ si::polar_coord kepler::Orbit::orbital_position(si::time_point now) const
 	float angle = (float)(elapsed_since_epoch) * M_PI * 2.0;
 	angle /= (float)(_sidereal_period.count());
 
-	Polar<si::meters, si::radians> tmp(si::radians(angle), _radius);
+	Polar<std::int64_t> tmp(angle, _radius.count());
 	// tmp.reduce();
 	return (si::polar_coord(tmp));
 }

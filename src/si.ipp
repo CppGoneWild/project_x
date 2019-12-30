@@ -392,28 +392,28 @@ deg_per_second make_angular_speed(degrees angle, T t)
 
 
 
-template <class D>
-typename D::type_t get_x(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> const & v)
+template <class D, class R>
+D get_x(SI_Value<Vector<D>, carth_coord_tag, R> const & v)
 {
-	return (v.count().x.count());
+	return (v.count().x);
 }
 
-template <class D>
-typename D::type_t get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> const & v)
+template <class D, class R>
+D get_y(SI_Value<Vector<D>, carth_coord_tag, R> const & v)
 {
-	return (v.count().y.count());
+	return (v.count().y);
 }
 
-template <class D>
-typename D::type_t & get_x(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> & v)
+template <class D, class R>
+D & get_x(SI_Value<Vector<D>, carth_coord_tag, R> & v)
 {
-	return (v.count().x.count());
+	return (v.count().x);
 }
 
-template <class D>
-typename D::type_t & get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> & v)
+template <class D, class R>
+D & get_y(SI_Value<Vector<D>, carth_coord_tag, R> & v)
 {
-	return (v.count().y.count());
+	return (v.count().y);
 }
 
 
@@ -423,25 +423,25 @@ typename D::type_t & get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::rati
 
 
 template <class D, class A, class R>
-typename D::type_t get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> const & p)
+D get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> const & p)
 {
-	return (p.count().radius.count());
+	return (p.count().radius);
 }
 
 template <class D, class A, class R>
-typename A::type_t get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> const & p)
+A get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> const & p)
 {
-	return (p.count().theta.count());
+	return (p.count().theta);
 }
 
 template <class D, class A, class R>
-typename D::type_t & get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> & p)
+D & get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> & p)
 {
-	return (p.count().radius.count());
+	return (p.count().radius);
 }
 
 template <class D, class A, class R>
-typename A::type_t & get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> & p)
+A & get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> & p)
 {
-	return (p.count().theta.count());
+	return (p.count().theta);
 }

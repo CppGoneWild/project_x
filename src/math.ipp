@@ -381,14 +381,7 @@ Polar<T, U> to_polar(Vector<V> const & v)
 {
 	assert(false);
 	Polar<T, U> res;
-//	res.radius = std::hypot(v.x, v.y);
-//
-//	if (res.radius == 0)
-//		res.theta = 0;
-//	else if (v.y < 0)
-//		res.theta = -(std::acos2(v.x, res.radius));
-//	else
-//		res.theta = std::acos2(v.x, res.radius);
-//
+	res.radius = std::hypot(v.x, v.y);
+	res.theta = std::atan2(v.y, v.x);
 	return (res);
 }

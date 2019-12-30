@@ -24,7 +24,7 @@
 template <class T>
 struct Vector
 {
-	using Type_t = T;
+	using type_t = T;
 
 	T x;
 	T y;
@@ -119,6 +119,9 @@ double cross_product(Vector<T> const &, Vector<U> const &);
 template <class T, class U = double>
 struct Polar
 {
+	using rtype_t = T;
+	using atype_t = U;
+
 	U theta;
 	T radius;
 

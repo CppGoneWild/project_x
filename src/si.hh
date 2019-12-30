@@ -303,7 +303,7 @@ template <> deg_per_second si_cast<deg_per_second, float, rad_speed_tag, std::ra
 
 
 struct carth_coord_tag {};
-using carth_coord = SI_Value<Vector<meters>, carth_coord_tag>;
+using carth_coord = SI_Value<Vector<std::int64_t>, carth_coord_tag, meters::ratio_t>;
 
 
 
@@ -311,15 +311,15 @@ using carth_coord = SI_Value<Vector<meters>, carth_coord_tag>;
 
 
 
-template <class D>
-typename D::type_t get_x(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> const &);
-template <class D>
-typename D::type_t get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> const &);
+template <class D, class R>
+D get_x(SI_Value<Vector<D>, carth_coord_tag, R> const &);
+template <class D, class R>
+D get_y(SI_Value<Vector<D>, carth_coord_tag, R> const &);
 
-template <class D>
-typename D::type_t & get_x(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> &);
-template <class D>
-typename D::type_t & get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::ratio_t> &);
+template <class D, class R>
+D & get_x(SI_Value<Vector<D>, carth_coord_tag, R> &);
+template <class D, class R>
+D & get_y(SI_Value<Vector<D>, carth_coord_tag, R> &);
 
 
 
@@ -328,7 +328,7 @@ typename D::type_t & get_y(SI_Value<Vector<D>, carth_coord_tag, typename D::rati
 
 
 struct polar_coord_tag {};
-using polar_coord = SI_Value<Polar<meters, radians>, polar_coord_tag>;
+using polar_coord = SI_Value<Polar<carth_coord::type_t::type_t>, polar_coord_tag>;
 
 
 
@@ -339,16 +339,16 @@ using polar_coord = SI_Value<Polar<meters, radians>, polar_coord_tag>;
 
 
 template <class D, class A, class R>
-typename D::type_t get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> const &);
+D get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> const &);
 
 template <class D, class A, class R>
-typename A::type_t get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> const &);
+A get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> const &);
 
 template <class D, class A, class R>
-typename D::type_t & get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> &);
+D & get_radius(SI_Value<Polar<D, A>, polar_coord_tag, R> &);
 
 template <class D, class A, class R>
-typename A::type_t & get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> &);
+A & get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> &);
 
 
 
