@@ -305,6 +305,9 @@ template <> deg_per_second si_cast<deg_per_second, float, rad_speed_tag, std::ra
 struct carth_coord_tag {};
 using carth_coord = SI_Value<Vector<std::int64_t>, carth_coord_tag, meters::ratio_t>;
 
+using meters_2d      = carth_coord;
+using kilo_meters_2d = SI_Value<Vector<double>, carth_coord_tag, kilo_meters::ratio_t>;
+
 
 
 // helpers for carthesian composante direct access
@@ -328,9 +331,10 @@ D & get_y(SI_Value<Vector<D>, carth_coord_tag, R> &);
 
 
 struct polar_coord_tag {};
-using polar_coord = SI_Value<Polar<carth_coord::type_t::type_t>, polar_coord_tag>;
+using polar_coord = SI_Value<Polar<carth_coord::type_t::type_t, float>, polar_coord_tag, meters::ratio_t>;
 
-
+using meters_polar      = carth_coord;
+using kilo_meters_polar = SI_Value<Polar<kilo_meters_2d::type_t::type_t, float>, carth_coord_tag, kilo_meters_2d::ratio_t>;
 
 
 // helpers for polar composante direct access

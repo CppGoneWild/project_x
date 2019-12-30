@@ -55,12 +55,6 @@ template <>
 si::carth_coord si::si_cast<si::carth_coord, si::polar_coord::type_t, si::polar_coord::tag_t, si::polar_coord::ratio_t>(si::polar_coord s)
 {
 	carth_coord res(to_carthesian<si::carth_coord::type_t::type_t>(s.count()));
-
-	//if (get_radius(s) != 0) {
-	//	get_x(res) = get_radius(s) * std::cos(get_theta(s));
-	//	get_y(res) = get_radius(s) * std::sin(get_theta(s));
-	//}
-
 	return (res);
 }
 
@@ -70,8 +64,5 @@ si::polar_coord si::si_cast<si::polar_coord, si::carth_coord::type_t, si::carth_
 	assert(false);
 
 	polar_coord res(to_polar<si::polar_coord::type_t::rtype_t, si::polar_coord::type_t::atype_t>(s.count()));
-	//get_radius(res) = std::hypot(get_x(s), get_y(s));
-	//get_theta(res) = std::atan2(get_y(s), get_x(s));
-
 	return (res);
 }
