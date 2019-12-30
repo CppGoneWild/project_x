@@ -133,7 +133,7 @@ private:
 	Orbit _orbit;
 
 	OrbitalBody * _satellite_of = nullptr;
-	System * _system = nullptr;
+	System _system;
 
 	static void _copy_system(OrbitalBody const & src, OrbitalBody & dest);
 	static void _move_system(OrbitalBody && src, OrbitalBody & dest);

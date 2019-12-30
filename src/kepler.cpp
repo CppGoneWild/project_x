@@ -87,25 +87,21 @@ si::time_point & kepler::Orbit::epoch()
 
 void kepler::OrbitalBody::_copy_system(OrbitalBody const & src, OrbitalBody & dest)
 {
-	delete dest._system;
-	dest._system = nullptr;	
+	dest._system.clear();
 
-	if (src._system) {
-		dest._system = new System;
-		for (auto it = src._system->cbegin(); it == src._system->cend(); it++)
-			dest._system->emplace_back(*it)._satellite_of = &dest;
+	if (src._system.empty() == false) {
+		for (auto it = src._system.cbegin(); it == src._system.cend(); it++)
+			dest._system.emplace_back(*it)._satellite_of = &dest;
 	}
 }
 
 void kepler::OrbitalBody::_move_system(OrbitalBody && src, OrbitalBody & dest)
 {
-	delete dest._system;
-	dest._system = nullptr;	
+	dest._system.clear();
 
-	if (src._system) {
-		dest._system = src._system;
-		src._system = nullptr;
-		for (auto it = dest._system->begin(); it == dest._system->end(); it++)
+	if (src._system.empty() == false) {
+		dest._system = std::move(src._system);
+		for (auto it = dest._system.begin(); it == dest._system.end(); it++)
 			it->_satellite_of = &dest;
 	}
 }
@@ -115,22 +111,20 @@ void kepler::OrbitalBody::_move_system(OrbitalBody && src, OrbitalBody & dest)
 
 kepler::OrbitalBody::OrbitalBody(OrbitalBody const & oth)
 : _radius(oth._radius), _orbit(oth._orbit),
-  _satellite_of(oth._satellite_of), _system(nullptr)
+  _satellite_of(oth._satellite_of), _system()
 {
 	_copy_system(oth, *this);
 }
 
 kepler::OrbitalBody::OrbitalBody(OrbitalBody && oth)
 : _radius(oth._radius), _orbit(oth._orbit),
-  _satellite_of(oth._satellite_of), _system(nullptr)
+  _satellite_of(oth._satellite_of), _system()
 {
 	_move_system(std::move(oth), *this);
 }
 
 kepler::OrbitalBody::~OrbitalBody()
-{
-	delete _system;
-}
+{}
 
 kepler::OrbitalBody & kepler::OrbitalBody::operator=(OrbitalBody const & oth)
 {
@@ -155,7 +149,7 @@ kepler::OrbitalBody & kepler::OrbitalBody::operator=(OrbitalBody && oth)
 }
 
 kepler::OrbitalBody::OrbitalBody(Orbit const & o, si::meters radius)
-: _radius(radius), _orbit(o), _satellite_of(nullptr), _system(nullptr)
+: _radius(radius), _orbit(o), _satellite_of(nullptr), _system()
 {}
 
 si::carth_coord kepler::OrbitalBody::stellar_position(si::time_point now) const
@@ -205,35 +199,29 @@ kepler::OrbitalBody & kepler::OrbitalBody::satellite_of()
 
 bool kepler::OrbitalBody::has_system() const
 {
-	return (_system != nullptr);
+	return (_system.empty() == false);
 }
 
 kepler::OrbitalBody::System const & kepler::OrbitalBody::system() const
 {
-	return (*_system);
+	return (_system);
 }
 
 kepler::OrbitalBody::System & kepler::OrbitalBody::system()
 {
-	return (*_system);
+	return (_system);
 }
 
 kepler::OrbitalBody & kepler::OrbitalBody::add(OrbitalBody const & body)
 {
-	if (_system == nullptr)
-		_system = new System;
-
-	OrbitalBody & new_body = _system->emplace_back(body);
+	OrbitalBody & new_body = _system.emplace_back(body);
 	new_body._satellite_of = this;
 	return (new_body);
 }
 
 kepler::OrbitalBody & kepler::OrbitalBody::add(OrbitalBody && body)
 {
-	if (_system == nullptr)
-		_system = new System;
-
-	OrbitalBody & new_body = _system->emplace_back(body);
+	OrbitalBody & new_body = _system.emplace_back(body);
 	new_body._satellite_of = this;
 	return (new_body);
 }
