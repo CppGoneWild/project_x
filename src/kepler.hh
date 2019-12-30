@@ -21,6 +21,7 @@ namespace kepler
 
 
 
+
 /*
                               ____       __    _ __
                              / __ \_____/ /_  (_) /_
@@ -90,6 +91,8 @@ Orbit::Orbit(D radius, T revolution, si::time_point epoch)
 class OrbitalBody
 {
 public:
+	using System = std::list<OrbitalBody>;
+
 	OrbitalBody() = default;
 
 	OrbitalBody(OrbitalBody const &);
@@ -99,11 +102,8 @@ public:
 	OrbitalBody & operator=(OrbitalBody const &);
 	OrbitalBody & operator=(OrbitalBody &&);
 
-	OrbitalBody(Orbit const &, si::meters radius); ///<around nothing
-	OrbitalBody(Orbit const &, OrbitalBody & around, si::meters radius);
-
+	OrbitalBody(Orbit const &, si::meters radius);
 	template <class D> OrbitalBody(Orbit const &, D radius);
-	template <class D> OrbitalBody(Orbit const &, OrbitalBody & around, D radius);
 
 	/**
 	 * @brief relative to star.
@@ -122,11 +122,21 @@ public:
 	OrbitalBody const & satellite_of() const;
 	OrbitalBody & satellite_of();
 
+	bool has_system() const;
+	System const & system() const;
+	System & system();
+	OrbitalBody & add(OrbitalBody const &);
+	OrbitalBody & add(OrbitalBody &&);
+
 private:
 	si::meters _radius;
 	Orbit _orbit;
 
 	OrbitalBody * _satellite_of = nullptr;
+	System * _system = nullptr;
+
+	static void _copy_system(OrbitalBody const & src, OrbitalBody & dest);
+	static void _move_system(OrbitalBody && src, OrbitalBody & dest);
 };
 
 
@@ -135,27 +145,6 @@ template <class D> OrbitalBody::OrbitalBody(Orbit const & o, D radius)
 : OrbitalBody(o, si::si_cast<si::meters>(radius))
 {}
 
-template <class D> OrbitalBody::OrbitalBody(Orbit const & o, OrbitalBody & around, D radius)
-: OrbitalBody(o, around, si::si_cast<si::meters>(radius))
-{}
-
-
-
-/*
-                                         __
-                        _______  _______/ /____  ____ ___
-                       / ___/ / / / ___/ __/ _ \/ __ `__ \
-                      (__  ) /_/ (__  ) /_/  __/ / / / / /
-                     /____/\__, /____/\__/\___/_/ /_/ /_/
-                          /____/
-*/
-
-
-
-using System = std::vector<OrbitalBody *>;
-
-void add_to_system(System &, OrbitalBody & planet);
-void add_to_system(System &, OrbitalBody & moon, OrbitalBody const & planet);
 
 
 	
