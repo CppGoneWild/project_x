@@ -43,14 +43,10 @@ public:
 	static const bool is_steady = false;
 
 
-	using seconds  = duration;
-	using minutes  = std::chrono::duration<double, std::ratio<60>>;
-	using hours    = std::chrono::duration<double, std::ratio<3600>>;
-	using days     = std::chrono::duration<double, std::ratio<86400>>;
-	using weeks    = std::chrono::duration<double, std::ratio<604800>>;
-	using months   = std::chrono::duration<double, std::ratio<2629746>>;   ///< Exactly 1/12 of a year
-	using years    = std::chrono::duration<double, std::ratio<31556952>>;  ///<  365.2425 days
-	using century  = std::chrono::duration<double, std::ratio<3155695200>>;
+	using days     = duration;
+	using months   = std::chrono::duration<double, std::ratio<30>>;
+	using years    = std::chrono::duration<double, std::ratio<360>>;
+	using century  = std::chrono::duration<double, std::ratio<36000>>;
 
 
 	static time_point now() noexcept;
@@ -60,8 +56,6 @@ public:
 	static duration advance(duration) noexcept;
 	template <class REP, class PERIOD>
 	static duration advance(std::chrono::duration<REP, PERIOD>) noexcept;
-
-	static std::tm to_tm(time_point) noexcept;
 
 	static std::string to_string(time_point);
 	static std::string to_string(duration d);

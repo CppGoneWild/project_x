@@ -43,41 +43,30 @@ UniversalClock::duration UniversalClock::advance(duration d) noexcept
 	return (_last_tic);
 }
 
-std::tm UniversalClock::to_tm(time_point t) noexcept
-{
-	static constexpr int linux_epoch_years = 1900;
-	static constexpr int project_x_epoch_years = 4242;
-
-	static std::tm res;
-
-	res.tm_year = t.time_since_epoch().count() / years::period::num;
-
-	res.tm_mon  = (t.time_since_epoch().count() - res.tm_year * years::period::num) / months::period::num;
-	res.tm_mday = (t.time_since_epoch().count() - res.tm_year * years::period::num - res.tm_mon * months::period::num) / days::period::num;
-	res.tm_hour = (t.time_since_epoch().count() - res.tm_year * years::period::num - res.tm_mon * months::period::num - res.tm_mday * days::period::num) / hours::period::num;
-	res.tm_min  = (t.time_since_epoch().count() - res.tm_year * years::period::num - res.tm_mon * months::period::num - res.tm_mday * days::period::num - res.tm_hour * hours::period::num) / minutes::period::num;
-	res.tm_sec  = (t.time_since_epoch().count() - res.tm_year * years::period::num - res.tm_mon * months::period::num - res.tm_mday * days::period::num - res.tm_hour * hours::period::num - res.tm_min * minutes::period::num);
-
-	res.tm_year = res.tm_year - linux_epoch_years + project_x_epoch_years;
-
-	res.tm_wday = t.time_since_epoch().count() / days::period::num % 7;
-	res.tm_yday = (t.time_since_epoch().count() - res.tm_year % years::period::num) / days::period::num;
-
-	res.tm_isdst = -1;
-
-	return (res);
-}
 
 std::string UniversalClock::to_string(time_point t)
 {
-	static const char date_format[] = "%H:%M:%S %a %b %d-%m-%Y";
+	std::int64_t year  = std::chrono::duration_cast<UniversalClock::years> (t.time_since_epoch()).count();
+	std::int64_t month = std::chrono::duration_cast<UniversalClock::months>(t.time_since_epoch() - std::chrono::duration_cast<UniversalClock::duration>(UniversalClock::years(year))).count();
+	std::int64_t day   = std::chrono::duration_cast<UniversalClock::days>  (t.time_since_epoch() - std::chrono::duration_cast<UniversalClock::duration>(UniversalClock::years(year)) - std::chrono::duration_cast<UniversalClock::duration>(UniversalClock::months(month))).count();
 
-	char asciitime[128] = {'\0'};
-	std::tm tm = UniversalClock::to_tm(t);
+	year += 2200;
 
-	std::strftime(asciitime, 128, date_format, &tm);
+	std::string res;
+	if (day < 10)
+		res += "0";
+	res += std::to_string(day);
 
-	return (std::string(asciitime));
+	res += ".";
+
+	if (month < 10)
+		res += "0";
+	res += std::to_string(month);
+
+	res += ".";
+	res += std::to_string(year);
+
+	return (res);
 }
 
 template <class D>
@@ -94,19 +83,16 @@ std::string UniversalClock::to_string(duration d)
 	{
 		if (duration_as_integer.count() >= 1.0) {
 			res += std::to_string(int(duration_as_integer.count())) + c_unit;
-			d -= std::chrono::duration_cast<UniversalClock::seconds>(duration_as_integer);
+			d -= std::chrono::duration_cast<UniversalClock::days>(duration_as_integer);
  		}
 	};
 
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::century>(d)), "C");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "Y");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "M");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::days>(d)),  "d");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::hours>(d)), "h");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::minutes>(d)), "m");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::century>(d)), "c");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "y");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "m");
 
 	if (d.count() > 0)
-		res += std::to_string(d.count()) + "s";
+		res += std::to_string(d.count()) + "d";
 
 	return (res);
 }
