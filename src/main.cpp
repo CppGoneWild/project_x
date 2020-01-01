@@ -129,6 +129,9 @@ int main(int, char const * const *, char const * const *)
 
 	COUT_INFO << "Main loop start";
 
+	COUT_INFO << si::to_short_string(si::astronomical_units(10));
+	COUT_INFO << si::to_long_string(si::astronomical_units(10));
+
 
 	// main loop
 	while (window.isOpen()) {

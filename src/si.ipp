@@ -207,13 +207,6 @@ SI_Value<REP, TAG, RATIO> SI_Value<REP, TAG, RATIO>::operator%(U const & oth) co
 	return (res);
 }
 
-template <class REP, class TAG, class RATIO>
-template <class REP_2>
-SI_Value<REP_2, TAG, std::ratio<1>> SI_Value<REP, TAG, RATIO>::si() const
-{
-	return si_cast<SI_Value<REP_2, TAG, std::ratio<1>>>(*this); 
-}
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -236,7 +229,6 @@ TO_SI si_cast(SI_Value<REP, TAG, RATIO> s)
 		                  SI_Value<REP, TAG, RATIO>,
 		                  std::ratio_divide<RATIO, typename TO_SI::ratio_t>>(s));
 }
-
 
 
 /*
@@ -264,7 +256,7 @@ TO_SI si_cast(SI_Value<REP, TAG, RATIO> s)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/////                              surface                                /////
+/////                               surface                                /////
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -445,3 +437,4 @@ A & get_theta(SI_Value<Polar<D, A>, polar_coord_tag, R> & p)
 {
 	return (p.count().theta);
 }
+

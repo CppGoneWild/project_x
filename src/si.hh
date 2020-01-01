@@ -80,8 +80,6 @@ public:
 	template <class U> SI_Value<REP, TAG, RATIO> operator/(U const &) const;
 	template <class U> SI_Value<REP, TAG, RATIO> operator%(U const &) const;
 
-	template <class REP_2 = REP> SI_Value<REP_2, TAG, std::ratio<1>> si() const;
-
 private:
 	REP _value;
 };
@@ -366,6 +364,240 @@ carth_coord si_cast<carth_coord, polar_coord::type_t, polar_coord::tag_t, polar_
 
 template <>
 polar_coord si_cast<polar_coord, carth_coord::type_t, carth_coord::tag_t, carth_coord::ratio_t>(carth_coord);
+
+
+
+
+/*
+                    __                  __       _
+                   / /_____       _____/ /______(_)___  ____ _
+                  / __/ __ \     / ___/ __/ ___/ / __ \/ __ `/
+                 / /_/ /_/ /    (__  ) /_/ /  / / / / / /_/ /
+                 \__/\____/____/____/\__/_/  /_/_/ /_/\__, /
+                         /_____/                     /____/
+*/
+
+
+
+template <class TAG, class RATIO>
+struct name_data
+{
+	static constexpr char name[] = "not defined";
+	static constexpr char abr[] = "ndef";
+};
+
+
+template <class TAG, class RATIO>
+std::string name()
+{
+	return (std::string(name_data<TAG, RATIO>::name));
+}
+template <class TAG, class RATIO>
+std::string abr()
+{
+	return (std::string(name_data<TAG, RATIO>::abr));
+}
+
+
+template <class REP, class TAG, class RATIO>
+std::string to_short_string(SI_Value<REP, TAG, RATIO> s)
+{
+	return (std::to_string(s.count()) + abr<TAG, RATIO>());
+}
+template <class REP, class TAG, class RATIO>
+std::string to_long_string(SI_Value<REP, TAG, RATIO> s)
+{
+	return (std::to_string(s.count()) + std::string(" ") + name<TAG, RATIO>());
+}
+
+
+
+
+template <> struct name_data<meters::tag_t, meters::ratio_t>
+{
+	static constexpr char name[] = "meters";
+	static constexpr char abr[] = "m";
+};
+
+template <> struct name_data<kilo_meters::tag_t, kilo_meters::ratio_t>
+{
+	static constexpr char name[] = "kilo-meters";
+	static constexpr char abr[] = "km";
+};
+template <> struct name_data<mega_meters::tag_t, mega_meters::ratio_t>
+{
+	static constexpr char name[] = "mega-meters";
+	static constexpr char abr[] = "Mm";
+};
+template <> struct name_data<giga_meters::tag_t, giga_meters::ratio_t>
+{
+	static constexpr char name[] = "giga-meters";
+	static constexpr char abr[] = "Gm";
+};
+template <> struct name_data<astronomical_units::tag_t, astronomical_units::ratio_t>
+{
+	static constexpr char name[] = "astronomical-units";
+	static constexpr char abr[] = "AU";
+};
+template <> struct name_data<light_second::tag_t, light_second::ratio_t>
+{
+	static constexpr char name[] = "light-second";
+	static constexpr char abr[] = "ls";
+};
+template <> struct name_data<light_minute::tag_t, light_minute::ratio_t>
+{
+	static constexpr char name[] = "light-minute";
+	static constexpr char abr[] = "lm";
+};
+template <> struct name_data<light_hour::tag_t, light_hour::ratio_t>
+{
+	static constexpr char name[] = "light-hour";
+	static constexpr char abr[] = "lh";
+};
+template <> struct name_data<light_year::tag_t, light_year::ratio_t>
+{
+	static constexpr char name[] = "light-year";
+	static constexpr char abr[] = "ly";
+};
+
+
+
+template <> struct name_data<meters2::tag_t, meters2::ratio_t>
+{
+	static constexpr char name[] = "square-meters";
+	static constexpr char abr[] = "m2";
+};
+template <> struct name_data<ares::tag_t, ares::ratio_t>
+{
+	static constexpr char name[] = "ares";
+	static constexpr char abr[] = "a";
+};
+template <> struct name_data<hectares::tag_t, hectares::ratio_t>
+{
+	static constexpr char name[] = "hectares";
+	static constexpr char abr[] = "ha";
+};
+
+
+template <> struct name_data<meters3::tag_t, meters3::ratio_t>
+{
+	static constexpr char name[] = "cube-meters";
+	static constexpr char abr[] = "m3";
+};
+template <> struct name_data<liter::tag_t, liter::ratio_t>
+{
+	static constexpr char name[] = "liters";
+	static constexpr char abr[] = "l";
+};
+template <> struct name_data<tonneau::tag_t, tonneau::ratio_t>
+{
+	static constexpr char name[] = "tonneaux";
+	static constexpr char abr[] = "ton";
+};
+
+
+template <> struct name_data<milligramms::tag_t, milligramms::ratio_t>
+{
+	static constexpr char name[] = "milligramms";
+	static constexpr char abr[] = "mg";
+};
+template <> struct name_data<gramms::tag_t, gramms::ratio_t>
+{
+	static constexpr char name[] = "gramms";
+	static constexpr char abr[] = "g";
+};
+template <> struct name_data<kilogramms::tag_t, kilogramms::ratio_t>
+{
+	static constexpr char name[] = "kilogramms";
+	static constexpr char abr[] = "kg";
+};
+template <> struct name_data<tonnes::tag_t, tonnes::ratio_t>
+{
+	static constexpr char name[] = "tonnes";
+	static constexpr char abr[] = "tn";
+};
+template <> struct name_data<kilo_tonnes::tag_t, kilo_tonnes::ratio_t>
+{
+	static constexpr char name[] = "kilo-tonnes";
+	static constexpr char abr[] = "ktn";
+};
+template <> struct name_data<mega_tonnes::tag_t, mega_tonnes::ratio_t>
+{
+	static constexpr char name[] = "mega-tonnes";
+	static constexpr char abr[] = "Mtn";
+};
+
+
+template <> struct name_data<kg_by_meters3::tag_t, kg_by_meters3::ratio_t>
+{
+	static constexpr char name[] = "kilogramms-by-meters3";
+	static constexpr char abr[] = "kg/m3";
+};
+
+
+template <> struct name_data<radians::tag_t, radians::ratio_t>
+{
+	static constexpr char name[] = "radians";
+	static constexpr char abr[] = "rad";
+};
+template <> struct name_data<degrees::tag_t, degrees::ratio_t>
+{
+	static constexpr char name[] = "degrees";
+	static constexpr char abr[] = "deg";
+};
+
+
+template <> struct name_data<meters_per_second::tag_t, meters_per_second::ratio_t>
+{
+	static constexpr char name[] = "meters-per-second";
+	static constexpr char abr[] = "m/s";
+};
+template <> struct name_data<meters_per_hour::tag_t, meters_per_hour::ratio_t>
+{
+	static constexpr char name[] = "meters-per-hour";
+	static constexpr char abr[] = "m/h";
+};
+template <> struct name_data<meters_per_day::tag_t, meters_per_day::ratio_t>
+{
+	static constexpr char name[] = "meters-per-day";
+	static constexpr char abr[] = "m/d";
+};
+template <> struct name_data<km_per_second::tag_t, km_per_second::ratio_t>
+{
+	static constexpr char name[] = "kilo-meters-per-second";
+	static constexpr char abr[] = "km/s";
+};
+template <> struct name_data<km_per_hour::tag_t, km_per_hour::ratio_t>
+{
+	static constexpr char name[] = "kilo-meters-per-hour";
+	static constexpr char abr[] = "km/h";
+};
+template <> struct name_data<km_per_day::tag_t, km_per_day::ratio_t>
+{
+	static constexpr char name[] = "kilo-meters-per-day";
+	static constexpr char abr[] = "km/d";
+};
+
+
+template <> struct name_data<acceleration::tag_t, acceleration::ratio_t>
+{
+	static constexpr char name[] = "meters per seconds per seconds";
+	static constexpr char abr[] = "m/s2";
+};
+
+
+
+template <> struct name_data<rad_per_second::tag_t, rad_per_second::ratio_t>
+{
+	static constexpr char name[] = "radians-per-second";
+	static constexpr char abr[] = "rad/s";
+};
+template <> struct name_data<deg_per_second::tag_t, deg_per_second::ratio_t>
+{
+	static constexpr char name[] = "degrees-per-second";
+	static constexpr char abr[] = "deg/s";
+};
+
 
 
 
