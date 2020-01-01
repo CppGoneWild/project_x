@@ -232,6 +232,7 @@ template <> degrees si_cast<degrees, float, radian_tag, std::ratio<1>>(radians s
 
 using time_point = UniversalClock::time_point;
 using seconds = UniversalClock::seconds;
+using hours = UniversalClock::hours;
 
 using days    = UniversalClock::days;
 using years   = UniversalClock::years;
