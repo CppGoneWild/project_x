@@ -5,7 +5,9 @@
 
 
 #include <vector>
+#include <array>
 #include <string>
+#include <variant>
 
 
 
@@ -13,6 +15,45 @@
 namespace hubble
 {
 
+
+
+
+struct Type
+{
+	enum class M_Type {
+		None = 0,
+		Staroid,
+		Planetoid,
+		Asteroid,
+		Comet,
+		BlackHole,
+		Cloud
+	};
+
+	struct Star
+	{
+		std::array<char, 2> spectral;
+		std::array<char, 2> sspectral;
+		std::array<char, 4> yerkes;
+
+		Star() = default;
+		Star(std::string const & spectral_type, std::string const & sub_spectral, std::string const & yerkes);
+	};
+
+	enum class Planet
+	{
+		None = 0, Ground, Gaz, Ice
+	};
+
+
+	M_Type main;
+	std::variant<Planet, Star> second;
+
+	Type();
+	Type(M_Type);
+	Type(Planet);
+	Type(Star);
+};
 
 
 
@@ -27,13 +68,17 @@ public:
 	CelestialBody & operator=(CelestialBody const &) = default;
 	CelestialBody & operator=(CelestialBody &&)      = default;
 
-	explicit CelestialBody(std::string const &);
+	CelestialBody(std::string const &, Type);
 
 	std::string const & name() const;
 	std::string & name();
 
+	Type const & type() const;
+	Type & type();
+
 private:
 	std::string _name;
+	Type _type;
 };
 
 

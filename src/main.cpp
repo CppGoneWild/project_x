@@ -39,8 +39,19 @@ void display(hubble::System const & system)
 {
 	if (ImGui::Begin(system.name().c_str())) {
 		for (auto it = system.bodies().cbegin(); it != system.bodies().cend(); it++)
-			if (ImGui::TreeNode(it->name().c_str()))
+			if (ImGui::TreeNode(it->name().c_str())){
+				if (it->type().main == hubble::Type::M_Type::Staroid) {
+					std::string tmp;
+					tmp += std::get<hubble::Type::Star>(it->type().second).spectral.data();
+					tmp += std::get<hubble::Type::Star>(it->type().second).sspectral.data();
+					tmp += std::get<hubble::Type::Star>(it->type().second).yerkes.data();
+					ImGui::BulletText("%s", tmp.c_str());
+				}
+				else
+					ImGui::BulletText(std::get<hubble::Type::Planet>(it->type().second) == hubble::Type::Planet::Ground ? "ground" : "gaz");
+
 				ImGui::TreePop();
+			}
 	}
 	ImGui::End();
 }

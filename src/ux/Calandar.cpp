@@ -7,13 +7,24 @@
 #include "imgui.h"
 
 
+static void display_small(I_Timer const & timer)
+{
+	ImGui::ProgressBar(timer.progress(UniversalClock::now()),
+		                 ImVec2(-1, 0));
+	if (ImGui::IsItemHovered()) {
+		ImGui::BeginTooltip();
+		ImGui::Text("next update will be %s", UniversalClock::to_string(timer.next_update()).c_str());
+		ImGui::EndTooltip();
+	}
+
+}
 
 static void display_scheduler(Scheduler & scheduler)
 {
 	ImGui::AlignTextToFramePadding();         // Vertically align text node a bit lower so it'll be vertically centered with upcoming widget. Otherwise you can use SmallButton (smaller fit).
 	bool node_open = ImGui::TreeNode(&scheduler, "");  // Common mistake to avoid: if we want to SameLine after TreeNode we need to do it before we add child content.
 	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-	ImGui::ProgressBar(scheduler.progress(UniversalClock::now()), ImVec2(-1, 0), UniversalClock::to_string(scheduler.next_update() - UniversalClock::now()).c_str());
+	display_small(scheduler);
 
 	if (node_open) {
 		for (auto it = scheduler.crbegin(); it != scheduler.crend(); ++it) {
@@ -23,9 +34,7 @@ static void display_scheduler(Scheduler & scheduler)
 				display_scheduler(scheduler);
 			}
 			else {
-				ImGui::TreePush(&it->get());
-				ImGui::ProgressBar(it->get().progress(UniversalClock::now()), ImVec2(-1, 0), UniversalClock::to_string(it->get().next_update() - UniversalClock::now()).c_str());
-				ImGui::TreePop();
+				display_small(it->get());
 			}
 		}
 		ImGui::TreePop();
