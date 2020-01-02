@@ -32,8 +32,8 @@ struct Type
 
 	struct Star
 	{
-		std::array<char, 2> spectral;
-		std::array<char, 2> sspectral;
+		std::array<char, 4> spectral;
+		std::array<char, 4> sspectral;
 		std::array<char, 4> yerkes;
 
 		Star() = default;
@@ -97,23 +97,49 @@ public:
 	System & operator=(System const &) = default;
 	System & operator=(System &&)      = default;
 
-	explicit System(std::string const &);
+	explicit System(std::string const &, CelestialBody const &);
 
 	std::string const & name() const;
 	std::string & name();
+
+	CelestialBody const & main_body() const;
+	CelestialBody & main_body();
 
 	container_t const & bodies() const;
 	container_t & bodies();
 
 private:
 	std::string _name;
+	CelestialBody _main_body;
 	container_t _bodies;
 };
 
 
-
 System make_sol_system();
 
+
+class Galaxy
+{
+public:
+	using container_t = std::vector<System>;
+
+	Galaxy()               = default;
+	Galaxy(Galaxy const &) = default;
+	Galaxy(Galaxy &&)      = default;
+	~Galaxy()              = default;
+
+	Galaxy & operator=(Galaxy const &) = default;
+	Galaxy & operator=(Galaxy &&)      = default;
+
+	container_t const & systems() const;
+	container_t & systems();
+
+private:
+	container_t _systems;
+};
+
+
+Galaxy make_via_lactea();
 
 
 } // hubble

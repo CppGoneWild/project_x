@@ -11,9 +11,9 @@ hubble::Type::Star::Star(std::string const & spectral_type,
                          std::string const & y)
 : Star()
 {
-	assert(spectral_type.size() < sizeof(spectral));
-	assert(sub_spectral.size() < sizeof(sspectral));
-	assert(y.size() < sizeof(spectral));
+	assert(spectral_type.size() < spectral.size());
+	assert(sub_spectral.size() < sspectral.size());
+	assert(y.size() < spectral.size());
 
 	std::memcpy(spectral.data(), spectral_type.c_str(), spectral_type.size());
 	std::memcpy(sspectral.data(), sub_spectral.c_str(), sub_spectral.size());
@@ -74,8 +74,8 @@ hubble::Type & hubble::CelestialBody::type()
 
 
 
-hubble::System::System(std::string const & name)
-: _name(name), _bodies()
+hubble::System::System(std::string const & name, CelestialBody const & main)
+: _name(name), _main_body(main), _bodies()
 {}
 
 std::string const & hubble::System::name() const
@@ -86,6 +86,16 @@ std::string const & hubble::System::name() const
 std::string & hubble::System::name()
 {
 	return (_name);
+}
+
+hubble::CelestialBody const & hubble::System::main_body() const
+{
+	return (_main_body);
+}
+
+hubble::CelestialBody & hubble::System::main_body()
+{
+	return (_main_body);
 }
 
 hubble::System::container_t const & hubble::System::bodies() const
@@ -101,9 +111,8 @@ hubble::System::container_t & hubble::System::bodies()
 
 hubble::System hubble::make_sol_system()
 {
-	System sol("sol");
+	System sol("sol", CelestialBody("sun", Type::Star("G", "2", "V")));
 
-	sol.bodies().emplace_back("sun",     Type::Star("G", "2", "V"));
 	sol.bodies().emplace_back("mercury", Type::Planet::Ground);
 	sol.bodies().emplace_back("venus",   Type::Planet::Ground);
 	sol.bodies().emplace_back("earth",   Type::Planet::Ground);
@@ -116,3 +125,39 @@ hubble::System hubble::make_sol_system()
 	return (sol);
 }
 
+
+
+
+hubble::Galaxy::container_t const & hubble::Galaxy::systems() const
+{
+	return (_systems);
+}
+
+hubble::Galaxy::container_t & hubble::Galaxy::systems()
+{
+	return (_systems);
+}
+
+
+
+hubble::Galaxy hubble::make_via_lactea()
+{
+	Galaxy gal;
+
+	gal.systems().emplace_back(make_sol_system());
+
+	System sirius("sirius", CelestialBody("sirius A", Type::Star("A", "0m1", "Va")));
+	sirius.bodies().emplace_back("sirius B", Type::Star("DA", "2", "*"));
+	sirius.bodies().emplace_back("sirius I",   Type::Planet::Ground);
+	sirius.bodies().emplace_back("sirius II",  Type::Planet::Ground);
+	sirius.bodies().emplace_back("sirius III", Type::Planet::Gaz);
+
+	System proxima("proxima centauri", CelestialBody("alpha centauri", Type::Star("M", "5.5", "Ve")));
+	proxima.bodies().emplace_back("alpha centauri Cb",   Type::Planet::Ground);
+	proxima.bodies().emplace_back("alpha centauri Cd",   Type::Planet::Gaz);
+
+	gal.systems().emplace_back(sirius);
+	gal.systems().emplace_back(proxima);
+
+	return (gal);
+}

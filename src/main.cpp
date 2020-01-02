@@ -5,6 +5,8 @@
 #include "hubble.hh"
 
 #include "ux/Calandar.hh"
+#include "ux/Window.hh"
+
 #include "ui/Camera.hh"
 
 
@@ -35,23 +37,46 @@ void debug_timer_ctrl()
 	ImGui::End();
 }
 
+void _display(hubble::System const & system)
+{
+	auto display_celestial = [](auto const & c)
+	{
+		if (ImGui::TreeNode(c.name().c_str())){
+			if (c.type().main == hubble::Type::M_Type::Staroid) {
+				std::string tmp;
+				tmp += std::get<hubble::Type::Star>(c.type().second).spectral.data();
+				tmp += std::get<hubble::Type::Star>(c.type().second).sspectral.data();
+				tmp += std::get<hubble::Type::Star>(c.type().second).yerkes.data();
+				ImGui::BulletText("%s", tmp.c_str());
+			}
+			else
+				ImGui::BulletText(std::get<hubble::Type::Planet>(c.type().second) == hubble::Type::Planet::Ground ? "ground" : "gaz");
+			ImGui::TreePop();
+		}
+	};
+
+	display_celestial(system.main_body());
+	for (auto it = system.bodies().cbegin(); it != system.bodies().cend(); it++)
+		display_celestial(*it);
+}
+
 void display(hubble::System const & system)
 {
 	if (ImGui::Begin(system.name().c_str())) {
-		for (auto it = system.bodies().cbegin(); it != system.bodies().cend(); it++)
-			if (ImGui::TreeNode(it->name().c_str())){
-				if (it->type().main == hubble::Type::M_Type::Staroid) {
-					std::string tmp;
-					tmp += std::get<hubble::Type::Star>(it->type().second).spectral.data();
-					tmp += std::get<hubble::Type::Star>(it->type().second).sspectral.data();
-					tmp += std::get<hubble::Type::Star>(it->type().second).yerkes.data();
-					ImGui::BulletText("%s", tmp.c_str());
-				}
-				else
-					ImGui::BulletText(std::get<hubble::Type::Planet>(it->type().second) == hubble::Type::Planet::Ground ? "ground" : "gaz");
+		_display(system);
+	}
+	ImGui::End();
+}
 
-				ImGui::TreePop();
-			}
+
+void display(hubble::Galaxy const & g)
+{
+	if (ImGui::Begin("Galaxy")) {
+		for (auto it = g.systems().cbegin(); it != g.systems().cend(); it++)
+		if (ImGui::TreeNode(it->name().c_str())){
+			_display(*it);
+			ImGui::TreePop();
+		}
 	}
 	ImGui::End();
 }
@@ -79,10 +104,6 @@ int main(int, char const * const *, char const * const *)
 	ImGui::SFML::Init(window);
 
 
-	// ux
-	ux::Calandar calandar;
-
-
 	Scheduler scheduler;
 	Timer every_week(UniversalClock::days(7), UniversalClock::now());
 	Timer every_month(UniversalClock::months(1), UniversalClock::now());
@@ -92,6 +113,13 @@ int main(int, char const * const *, char const * const *)
 
 
 	hubble::System sol = hubble::make_sol_system();
+	hubble::Galaxy via_lactea = hubble::make_via_lactea();
+
+	// ux
+	ux::WindowMngr win_mngr;
+
+	win_mngr.windows().emplace_back(new ux::Calandar(scheduler));
+
 
 	COUT_INFO << "Main loop start";
 
@@ -114,10 +142,12 @@ int main(int, char const * const *, char const * const *)
 
 
 			debug_timer_ctrl();
-			calandar.display(scheduler);
+
+			win_mngr.display();
 
 			display(camera);
 			display(sol);
+			display(via_lactea);
 		}
 
 		ImGui::ShowDemoWindow();

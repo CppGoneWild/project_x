@@ -41,21 +41,28 @@ static void display_scheduler(Scheduler & scheduler)
 	}
 }
 
-void ux::Calandar::display(Scheduler & scheduler)
+ux::Calandar::Calandar(Scheduler & s)
+: Window(), _scheduler(&s)
+{}
+
+
+void ux::Calandar::display()
 {
+	assert(_scheduler);
+
 	_imgui_win_title = UniversalClock::to_string(UniversalClock::now());
 	_imgui_win_title += "###Calandar";
 
-	if (ImGui::Begin(_imgui_win_title.c_str())) {
+	if (ImGui::Begin(_imgui_win_title.c_str(), &_open)) {
 		ImGui::DragInt("Advance by : ", &_time_incr);
 		ImGui::SameLine();
-		if (ImGui::Button("day")) scheduler.advance_until(UniversalClock::days(_time_incr));
+		if (ImGui::Button("day")) _scheduler->advance_until(UniversalClock::days(_time_incr));
 		ImGui::SameLine();
-		if (ImGui::Button("month")) scheduler.advance_until(UniversalClock::months(_time_incr));
+		if (ImGui::Button("month")) _scheduler->advance_until(UniversalClock::months(_time_incr));
 		ImGui::SameLine();
-		if (ImGui::Button("year")) scheduler.advance_until(UniversalClock::years(_time_incr));
+		if (ImGui::Button("year")) _scheduler->advance_until(UniversalClock::years(_time_incr));
 
-		display_scheduler(scheduler);
+		display_scheduler(*_scheduler);
 	}
 	ImGui::End();
 }
