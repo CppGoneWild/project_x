@@ -1,50 +1,16 @@
 #include "Calandar.hh"
 
 #include "logg.hh"
-#include "time.hh"
+#include "../time.hh"
+#include "ux/time.hh"
 
 
 #include "imgui.h"
 
 
-static void display_small(I_Timer const & timer)
-{
-	ImGui::ProgressBar(timer.progress(UniversalClock::now()),
-		                 ImVec2(-1, 0));
-	if (ImGui::IsItemHovered()) {
-		ImGui::BeginTooltip();
-		ImGui::Text("next update will be %s", UniversalClock::to_string(timer.next_update()).c_str());
-		ImGui::EndTooltip();
-	}
-
-}
-
-static void display_scheduler(Scheduler & scheduler)
-{
-	ImGui::AlignTextToFramePadding();         // Vertically align text node a bit lower so it'll be vertically centered with upcoming widget. Otherwise you can use SmallButton (smaller fit).
-	bool node_open = ImGui::TreeNode(&scheduler, "");  // Common mistake to avoid: if we want to SameLine after TreeNode we need to do it before we add child content.
-	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-	display_small(scheduler);
-
-	if (node_open) {
-		for (auto it = scheduler.crbegin(); it != scheduler.crend(); ++it) {
-
-			auto const * is_scheduler = dynamic_cast<Scheduler const *>(&it->get());
-			if (is_scheduler) {
-				display_scheduler(scheduler);
-			}
-			else {
-				display_small(it->get());
-			}
-		}
-		ImGui::TreePop();
-	}
-}
-
 ux::Calandar::Calandar(Scheduler & s)
 : Window(), _scheduler(&s)
 {}
-
 
 void ux::Calandar::display()
 {
@@ -62,7 +28,7 @@ void ux::Calandar::display()
 		ImGui::SameLine();
 		if (ImGui::Button("year")) _scheduler->advance_until(UniversalClock::years(_time_incr));
 
-		display_scheduler(*_scheduler);
+		ux::display_as_tree_node(*_scheduler);
 	}
 	ImGui::End();
 }
