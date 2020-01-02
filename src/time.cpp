@@ -43,26 +43,40 @@ UniversalClock::duration UniversalClock::advance(duration d) noexcept
 	return (_last_tic);
 }
 
+template <class D>
+static std::int64_t _get_only(UniversalClock::time_point & t)
+{
+	std::int64_t res  = std::chrono::duration_cast<D>(t.time_since_epoch()).count();
+	t -= std::chrono::duration_cast<UniversalClock::duration>(D(res));
+	return (res);
+}
 
 std::string UniversalClock::to_string(time_point t)
 {
-	std::int64_t year  = std::chrono::duration_cast<UniversalClock::years> (t.time_since_epoch()).count();
-	std::int64_t month = std::chrono::duration_cast<UniversalClock::months>(t.time_since_epoch() - std::chrono::duration_cast<UniversalClock::duration>(UniversalClock::years(year))).count();
-	std::int64_t day   = std::chrono::duration_cast<UniversalClock::days>  (t.time_since_epoch() - std::chrono::duration_cast<UniversalClock::duration>(UniversalClock::years(year)) - std::chrono::duration_cast<UniversalClock::duration>(UniversalClock::months(month))).count();
-
-	year += 2200;
+	std::int64_t year, month, day;
+	auto decompose_time = [](time_point t, auto & y, auto & m, auto & d)
+	{
+		t += std::chrono::duration_cast<duration>(days(1)) + std::chrono::duration_cast<duration>(months(1)); // date do start at day 1 month 1.
+		y = _get_only<years>(t) + 2200;
+		m = _get_only<months>(t);
+		d = _get_only<days>(t);
+	};
 
 	std::string res;
-	if (day < 10)
-		res += "0";
-	res += std::to_string(day);
+	auto display_with_2_digit = [&res](auto value)
+	{
+		assert(value > 0);
+		if (value < 10)
+			res += "0";
+		res += std::to_string(value);
+		return (res);
+	};
 
+	decompose_time(t, year, month, day);
+
+	display_with_2_digit(day);
 	res += ".";
-
-	if (month < 10)
-		res += "0";
-	res += std::to_string(month);
-
+	display_with_2_digit(month);
 	res += ".";
 	res += std::to_string(year);
 
