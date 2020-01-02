@@ -2,6 +2,8 @@
 
 #include "time.hh"
 
+#include "hubble.hh"
+
 #include "ux/Calandar.hh"
 #include "ui/Camera.hh"
 
@@ -29,6 +31,16 @@ void debug_timer_ctrl()
 			rendertimer.reset_stat();
 			imguitimer.reset_stat();
 		}
+	}
+	ImGui::End();
+}
+
+void display(hubble::System const & system)
+{
+	if (ImGui::Begin(system.name().c_str())) {
+		for (auto it = system.bodies().cbegin(); it != system.bodies().cend(); it++)
+			if (ImGui::TreeNode(it->name().c_str()))
+				ImGui::TreePop();
 	}
 	ImGui::End();
 }
@@ -68,6 +80,8 @@ int main(int, char const * const *, char const * const *)
 	scheduler.sort();
 
 
+	hubble::System sol = hubble::make_sol_system();
+
 	COUT_INFO << "Main loop start";
 
 
@@ -90,7 +104,9 @@ int main(int, char const * const *, char const * const *)
 
 			debug_timer_ctrl();
 			calandar.display(scheduler);
+
 			display(camera);
+			display(sol);
 		}
 
 		ImGui::ShowDemoWindow();
