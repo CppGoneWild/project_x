@@ -43,10 +43,12 @@ public:
 	static const bool is_steady = false;
 
 
-	using days     = duration;
-	using months   = std::chrono::duration<double, std::ratio<30>>;
-	using years    = std::chrono::duration<double, std::ratio<360>>;
-	using century  = std::chrono::duration<double, std::ratio<36000>>;
+	using seconds = duration;
+	using minutes = std::chrono::duration<double, std::ratio<60>>;
+	using hours   = std::chrono::duration<double, std::ratio<3600>>;
+	using days    = std::chrono::duration<double, std::ratio<86400>>;
+	using months  = std::chrono::duration<double, std::ratio<2592000>>;
+	using years   = std::chrono::duration<double, std::ratio<31104000>>;
 
 
 	static time_point now() noexcept;

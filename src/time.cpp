@@ -53,27 +53,39 @@ static std::int64_t _get_only(UniversalClock::time_point & t)
 
 std::string UniversalClock::to_string(time_point t)
 {
-	std::int64_t year, month, day;
-	auto decompose_time = [](time_point t, auto & y, auto & m, auto & d)
+	std::int64_t year, month, day, hours, minutes, seconds;
+	auto decompose_time = [](time_point t, auto & Y, auto & M, auto & D,
+	                                       auto & h, auto & m, auto & s)
 	{
 		t += std::chrono::duration_cast<duration>(days(1)) + std::chrono::duration_cast<duration>(months(1)); // date do start at day 1 month 1.
-		y = _get_only<years>(t) + 2200;
-		m = _get_only<months>(t);
-		d = _get_only<days>(t);
+
+		Y = _get_only<UniversalClock::years>(t) + 2200;
+		M = _get_only<UniversalClock::months>(t);
+		D = _get_only<UniversalClock::days>(t);
+
+		h = _get_only<UniversalClock::hours>(t);
+		m = _get_only<UniversalClock::minutes>(t);
+		s = _get_only<UniversalClock::seconds>(t);
 	};
 
 	std::string res;
 	auto display_with_2_digit = [&res](auto value)
 	{
-		assert(value > 0);
+		assert(value >= 0);
 		if (value < 10)
 			res += "0";
 		res += std::to_string(value);
 		return (res);
 	};
 
-	decompose_time(t, year, month, day);
+	decompose_time(t, year, month, day, hours, minutes, seconds);
 
+	display_with_2_digit(seconds);
+	res += ":";
+	display_with_2_digit(minutes);
+	res += ":";
+	display_with_2_digit(hours);
+	res += " - ";
 	display_with_2_digit(day);
 	res += ".";
 	display_with_2_digit(month);
@@ -97,16 +109,18 @@ std::string UniversalClock::to_string(duration d)
 	{
 		if (duration_as_integer.count() >= 1.0) {
 			res += std::to_string(int(duration_as_integer.count())) + c_unit;
-			d -= std::chrono::duration_cast<UniversalClock::days>(duration_as_integer);
+			d -= std::chrono::duration_cast<UniversalClock::duration>(duration_as_integer);
  		}
 	};
 
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::century>(d)), "c");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "y");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "m");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "Y");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "M");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::days>(d)), "D");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::minutes>(d)), "h");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::seconds>(d)), "m");
 
 	if (d.count() > 0)
-		res += std::to_string(d.count()) + "d";
+		res += std::to_string(d.count()) + "s";
 
 	return (res);
 }
