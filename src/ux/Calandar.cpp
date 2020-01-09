@@ -28,7 +28,8 @@ void ux::Calandar::display()
 		ImGui::SameLine();
 		if (ImGui::Button("year")) _scheduler->advance_until(UniversalClock::years(_time_incr));
 
-		ux::display_as_tree_node(*_scheduler);
+		PopupContextMenu cm("Calandar context");
+		ux::display_in_tree(*_scheduler, cm);
 	}
 	ImGui::End();
 }

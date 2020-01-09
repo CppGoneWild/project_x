@@ -1,24 +1,23 @@
 #include "ux/time.hh"
 
-#include "ux/tools.hh"
-
 #include "../time.hh"
 
 
 #include "imgui.h"
 
 
-static void display_timer(I_Timer const & timer)
+static void display_timer(I_Timer const & timer, ux::PopupContextMenu & context_id)
 {
 	ImGui::ProgressBar(timer.progress(UniversalClock::now()));
 
-	ux::display_context_remainder(timer);
+	ux::display_in_context(timer, context_id);
+
 
 	if (ImGui::IsItemHovered())
-		ux::display_as_tooltip(timer);
+		ux::display_in_tooltip(timer);
 }
 
-static void display_scheduler(Scheduler const & scheduler)
+static void display_scheduler(Scheduler const & scheduler, ux::PopupContextMenu & context_id)
 {
 	// Vertically align text node a bit lower so it'll be vertically centered with upcoming widget. Otherwise you can use SmallButton (smaller fit).
 	ImGui::AlignTextToFramePadding();
@@ -27,11 +26,11 @@ static void display_scheduler(Scheduler const & scheduler)
 	bool node_open = ImGui::TreeNode(&scheduler, "");
 	
 	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-	display_timer(scheduler);
+	display_timer(scheduler, context_id);
 
 	if (node_open) {
 		for (auto it = scheduler.crbegin(); it != scheduler.crend(); ++it)
-			ux::display_as_tree_node(it->get());
+			ux::display_in_tree(it->get(), context_id);
 		ImGui::TreePop();
 	}
 }
@@ -39,46 +38,61 @@ static void display_scheduler(Scheduler const & scheduler)
 
 
 
-void ux::display_as_tree_node(I_Timer const & timer)
+void ux::display_in_tree(I_Timer const & timer, PopupContextMenu & context_id)
 {
 	auto const * is_scheduler = dynamic_cast<Scheduler const *>(&timer);
 	if (is_scheduler)
-		display_scheduler(*is_scheduler);
+		display_scheduler(*is_scheduler, context_id);
 	else {
 
 		{
 			ux::ScopeID scope_id(&timer);
-			display_timer(timer);			
+			display_timer(timer, context_id);			
 		}
 
 		{		
 			ux::ScopeID scope_id(&timer + 1);
 			ImGui::Bullet();
-			ux::display_as_embedded_text(timer, ux::timer_mode::Remaining, true);
+			ux::display_in_text(timer, ux::timer_mode::Remaining, context_id);
 		}
 		{
 			ux::ScopeID scope_id(&timer + 2);
 			ImGui::Bullet();
-			ux::display_as_embedded_text(timer, ux::timer_mode::Date, true);			
+			ux::display_in_text(timer, ux::timer_mode::Date, context_id);			
 		}
 
 	}
 }
 
-void ux::display_as_tooltip(I_Timer const & timer)
+void ux::display_in_tooltip(I_Timer const & timer)
 {
-	ImGui::BeginTooltip();
+	ux::ScopeToolTips sctt;
 
 	ImGui::Bullet();
-	display_as_embedded_text(timer, timer_mode::Remaining, false);
+	display_in_text(timer, timer_mode::Remaining);
 
 	ImGui::Bullet();
-	display_as_embedded_text(timer, timer_mode::Date, false);
-
-	ImGui::EndTooltip();
+	display_in_text(timer, timer_mode::Date);
 }
 
-void ux::display_as_embedded_text(I_Timer const & timer, timer_mode mode, bool context_auth)
+void ux::display_in_text(I_Timer const & timer, timer_mode mode)
+{
+	static const ImVec4 im_yellow(255, 255, 0, 255);
+	
+	if (mode == timer_mode::Remaining) {
+		auto remaining_duration = timer.next_update() - UniversalClock::now();
+		ImGui::TextColored(im_yellow, "%s", UniversalClock::to_string(remaining_duration).c_str());
+		ImGui::SameLine();
+		ImGui::Text("remaining");
+	}
+	else {
+		ImGui::Text("next update");
+		ImGui::SameLine();
+		ImGui::TextColored(im_yellow, "%s", UniversalClock::to_string(timer.next_update()).c_str());
+	}
+}
+
+void ux::display_in_text(I_Timer const & timer, timer_mode mode, PopupContextMenu & context_id)
 {
 	static const ImVec4 im_yellow(255, 255, 0, 255);
 	
@@ -86,8 +100,7 @@ void ux::display_as_embedded_text(I_Timer const & timer, timer_mode mode, bool c
 		auto remaining_duration = timer.next_update() - UniversalClock::now();
 		ImGui::TextColored(im_yellow, "%s", UniversalClock::to_string(remaining_duration).c_str());
 
-		if (context_auth)
-			display_context_remainder(timer);
+		display_in_context(timer, context_id);
 
 		ImGui::SameLine();
 		ImGui::Text("remaining");
@@ -97,17 +110,13 @@ void ux::display_as_embedded_text(I_Timer const & timer, timer_mode mode, bool c
 		ImGui::SameLine();
 		ImGui::TextColored(im_yellow, "%s", UniversalClock::to_string(timer.next_update()).c_str());
 
-		if (context_auth)
-			display_context_remainder(timer);
+		display_in_context(timer, context_id);
 	}
 }
 
-
-void ux::display_context_remainder(I_Timer const &)
+void ux::display_in_context(I_Timer const &, PopupContextMenu & context_id)
 {
-	  if (ImGui::BeginPopupContextItem("date remainder context menu")) {
-	      if (ImGui::Selectable("Set a remainder"))
-	      	;
-	      ImGui::EndPopup();
-	  }	
+	PopupContextMenu::Scope scpcm(context_id);
+	if (scpcm && ImGui::Selectable("Set a remainder"))
+		;
 }
