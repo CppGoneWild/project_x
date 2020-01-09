@@ -180,10 +180,10 @@ private:
 class ArbitraryTimer : public I_Timer
 {
 public:
-	ArbitraryTimer()                      = default;
+	ArbitraryTimer()                       = default;
 	ArbitraryTimer(ArbitraryTimer const &) = default;
 	ArbitraryTimer(ArbitraryTimer &&)      = default;
-	virtual ~ArbitraryTimer() override    = default;
+	virtual ~ArbitraryTimer() override     = default;
 
 	ArbitraryTimer & operator=(ArbitraryTimer const &) = default;
 	ArbitraryTimer & operator=(ArbitraryTimer &&)      = default;
@@ -255,10 +255,10 @@ public:
 	container_t & mutables();
 
 private:
-	Scheduler(Scheduler const &) = delete;
-	Scheduler(Scheduler &&) = delete;
+	Scheduler(Scheduler const &)             = delete;
+	Scheduler(Scheduler &&)                  = delete;
 	Scheduler & operator=(Scheduler const &) = delete;
-	Scheduler & operator=(Scheduler &&) = delete;
+	Scheduler & operator=(Scheduler &&)      = delete;
 
 	container_t _cyclicals;
 	container_t _abritraries;

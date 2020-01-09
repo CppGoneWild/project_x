@@ -15,8 +15,8 @@ SRC = external/ImGui/imgui-SFML.cpp \
       \
       src/ui/Camera.cpp \
       \
-      src/ux/Calandar.cpp \
       src/ux/time.cpp \
+      src/ux/tools.cpp \
       src/ux/Window.cpp \
       \
       src/hubble.cpp \

@@ -83,12 +83,15 @@ std::string UniversalClock::to_string(time_point t)
 
 	decompose_time(t, year, month, day, hours, minutes, seconds);
 
-	display_with_2_digit(seconds);
-	res += ":";
-	display_with_2_digit(minutes);
-	res += ":";
-	display_with_2_digit(hours);
-	res += " - ";
+	if (!(hours == 0 && minutes == 0 && seconds == 0)) {
+		display_with_2_digit(seconds);
+		res += ":";
+		display_with_2_digit(minutes);
+		res += ":";
+		display_with_2_digit(hours);
+		res += " - ";
+	}
+
 	display_with_2_digit(day);
 	res += ".";
 	display_with_2_digit(month);
