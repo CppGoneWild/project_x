@@ -89,7 +89,6 @@ int main(int, char const * const *, char const * const *)
 	rendertimer = COUT_TIMER("rendering     ");
 	imguitimer  = COUT_TIMER("imgui         ");
 
-
 	// sfml
 	sf::RenderWindow window;
 	window.create(sf::VideoMode(1900, 900), "project_x");
@@ -105,11 +104,10 @@ int main(int, char const * const *, char const * const *)
 
 
 	Scheduler scheduler;
-	Timer every_week(UniversalClock::days(7), UniversalClock::now());
-	Timer every_month(UniversalClock::months(1), UniversalClock::now());
+	CyclicalTimer every_week(UniversalClock::days(7));
+	CyclicalTimer every_month(UniversalClock::months(1));
 	scheduler.add(every_week);
 	scheduler.add(every_month);
-	scheduler.sort();
 
 
 	hubble::System sol = hubble::make_sol_system();

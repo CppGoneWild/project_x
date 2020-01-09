@@ -7,6 +7,9 @@
 
 */
 
+
+
+
 template <class REP, class PERIOD>
 UniversalClock::duration UniversalClock::advance(std::chrono::duration<REP, PERIOD> d) noexcept
 {
@@ -21,6 +24,7 @@ std::string UniversalClock::to_string(std::chrono::duration<REP, PERIOD> d)
 
 
 
+
 /*
                           _______
                          /_  __(_)___ ___  ___  _____
@@ -31,10 +35,17 @@ std::string UniversalClock::to_string(std::chrono::duration<REP, PERIOD> d)
 
 
 
+
 template <class D>
-Timer::Timer(D frequency, UniversalClock::time_point current_time)
-: Timer(std::chrono::duration_cast<UniversalClock::duration>(frequency), current_time)
+CyclicalTimer::CyclicalTimer(D frequency, UniversalClock::time_point t)
+: CyclicalTimer(std::chrono::duration_cast<UniversalClock::duration>(frequency), t)
 {}
+
+template <class D>
+CyclicalTimer::CyclicalTimer(D frequency)
+: CyclicalTimer(std::chrono::duration_cast<UniversalClock::duration>(frequency))
+{}
+
 
 
 
@@ -47,22 +58,10 @@ Timer::Timer(D frequency, UniversalClock::time_point current_time)
 */
 
 
+
+
 template <class D>
 void Scheduler::advance_until(D delta)
 {
 	advance_until(std::chrono::duration_cast<UniversalClock::duration>(delta));
-}
-
-template <class IT>
-void Scheduler::add(IT first, IT last)
-{
-	for (; first != last; first++)
-		add(*first);
-}
-
-template <class IT>
-void Scheduler::add_and_sort(IT first, IT last)
-{
-	add(first, last);
-	sort();
 }

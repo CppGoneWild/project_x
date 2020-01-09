@@ -2,6 +2,10 @@
 
 #include <algorithm> // stable_sort, is_sorted
 
+#include "logg.hh"
+
+
+
 
 /*
         __  __      _                            __________           __
@@ -13,10 +17,9 @@
 */
 
 
-
 UniversalClock::duration   UniversalClock::_last_tic(0);
-UniversalClock::time_point UniversalClock::_now(_last_tic);
 
+UniversalClock::time_point UniversalClock::_now(_last_tic);
 
 
 UniversalClock::time_point UniversalClock::now() noexcept
@@ -116,14 +119,16 @@ std::string UniversalClock::to_string(duration d)
 	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::years>(d)), "Y");
 	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::months>(d)), "M");
 	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::days>(d)), "D");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::minutes>(d)), "h");
-	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::seconds>(d)), "m");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::hours>(d)), "h");
+	write_duration_order(to_integer_duration(std::chrono::duration_cast<UniversalClock::minutes>(d)), "m");
 
 	if (d.count() > 0)
 		res += std::to_string(d.count()) + "s";
 
 	return (res);
 }
+
+
 
 
 /*
@@ -134,6 +139,7 @@ std::string UniversalClock::to_string(duration d)
                       /___/____/_/ /_/_/ /_/ /_/\___/_/
                          /_____/
 */
+
 
 
 
@@ -164,6 +170,7 @@ UniversalClock::time_point I_Timer::max()
 
 
 
+
 /*
                           _______
                          /_  __(_)___ ___  ___  _____
@@ -174,54 +181,83 @@ UniversalClock::time_point I_Timer::max()
 
 
 
-Timer::Timer(UniversalClock::time_point next_update)
-: I_Timer(), _frequency(), _next_update(next_update)
+
+////////////////////////////////////////////////////////////////////////////////
+//                               CyclicalTimer                                //
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+CyclicalTimer::CyclicalTimer(UniversalClock::duration frequency, UniversalClock::time_point next_update)
+: I_Timer(), _frequency(frequency), _next_update(next_update)
+{
+	assert (UniversalClock::now() + frequency <= next_update);
+	assert (frequency != UniversalClock::duration());
+
+	_last_update = _next_update - frequency;
+}
+
+CyclicalTimer::CyclicalTimer(UniversalClock::duration frequency)
+: CyclicalTimer(frequency, UniversalClock::now() + frequency)
 {}
 
-Timer::Timer(UniversalClock::duration frequency, UniversalClock::time_point current_time)
-: I_Timer(), _frequency(frequency), _next_update(current_time + _frequency)
-{
-	assert(_frequency != UniversalClock::duration()); // use single shot mode
-	_last_update = current_time;
-}
-
-UniversalClock::time_point Timer::next_update() const
+UniversalClock::time_point CyclicalTimer::next_update() const
 {
 	return (_next_update);
 }
 
-UniversalClock::time_point Timer::next_next_update() const
+UniversalClock::time_point CyclicalTimer::next_next_update() const
 {
-	return (_frequency == UniversalClock::duration() ? I_Timer::max() : _next_update + _frequency);
+	return (_next_update+ + _frequency);
 }
 
-UniversalClock::time_point & Timer::next_update()
-{
-	return (_next_update);
-}
-
-UniversalClock::duration Timer::frequency() const
+UniversalClock::duration CyclicalTimer::frequency() const
 {
 	return (_frequency);
 }
 
-UniversalClock::duration & Timer::frequency()
-{
-	return (_frequency);
-}
-
-void Timer::update(UniversalClock::time_point date)
+void CyclicalTimer::update(UniversalClock::time_point date)
 {
 	assert(_next_update <= date); // ensure we do need to update.
-	assert(_frequency == UniversalClock::duration() || _next_update + _frequency > date); // ensure we did not missed a cycle.
+	assert(_next_update + _frequency > date); // ensure we did not missed a cycle.
 
 	_last_update = _next_update;
-
-	if (_frequency == UniversalClock::duration())
-		_next_update = UniversalClock::time_point::max();
-	else
-		_next_update += _frequency;
+	_next_update += _frequency;
 }
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                               ArbitraryTimer                               //
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+ArbitraryTimer::ArbitraryTimer(UniversalClock::time_point next_update)
+: I_Timer(), _next_update(next_update)
+{}
+
+UniversalClock::time_point ArbitraryTimer::next_update() const
+{
+	return (_next_update);
+}
+
+UniversalClock::time_point ArbitraryTimer::next_next_update() const
+{
+	return (I_Timer::max());
+}
+
+void ArbitraryTimer::update(UniversalClock::time_point date)
+{
+	assert(_next_update <= date); // ensure we do need to update.
+
+	_last_update = _next_update;
+	_next_update = I_Timer::max();
+}
+
 
 
 
@@ -235,94 +271,86 @@ void Timer::update(UniversalClock::time_point date)
 
 
 
-/**
- * @brief used to sort the Scheduler list by time in REVERSE_ORDER
- */
-struct I_Timer_less
+
+Scheduler::Scheduler()
+: I_Timer(), _cyclicals(), _abritraries(), _mutables()
+{}
+
+Scheduler::~Scheduler()
+{}
+
+static void find_next(Scheduler::container_t const & c,
+                      UniversalClock::time_point & res)
 {
-	template <class T>
-	bool operator()(T a, T b)
-	{
-		return (a.get().next_update() > b.get().next_update());
+	for (auto it = c.cbegin(); it != c.cend(); ++it)
+		if ((*it)->next_update() < res)
+			res = (*it)->next_update();
+};
+
+static void find_next_next(Scheduler::container_t const & c,
+                           UniversalClock::time_point & res)
+{
+	for (auto it = c.cbegin(); it != c.cend(); ++it){
+		if ((*it)->next_next_update() < res)
+			res = (*it)->next_next_update();
+		if ((*it)->next_update() < res)
+			res = (*it)->next_update();		
 	}
 };
 
-
-
 UniversalClock::time_point Scheduler::next_update() const
 {
-	assert(is_sorted());
+	UniversalClock::time_point res(UniversalClock::time_point::max());
 
-	return (_updatable.empty() ? I_Timer::max() : _updatable.back().get().next_update());
+	find_next(_cyclicals, res);
+	find_next(_abritraries, res);
+	find_next(_mutables, res);
+
+	return (res);
 }
 
 UniversalClock::time_point Scheduler::next_next_update() const
 {
-	assert(is_sorted());
+	UniversalClock::time_point res(UniversalClock::time_point::max());
 
-	UniversalClock::time_point res = I_Timer::max();
-
-	for(auto it = _updatable.rbegin(); it != _updatable.rend(); ++it) {
-		if (it->get().next_next_update() < res)
-			res = it->get().next_next_update();
-		else if (it->get().next_update() < res)
-			res = it->get().next_update();
-	}
+	find_next_next(_cyclicals, res);
+	find_next_next(_abritraries, res);
+	find_next_next(_mutables, res);
 
 	return (res);
 }
 
 void Scheduler::update(UniversalClock::time_point date)
 {
-	assert(is_sorted());
-	assert(next_update() <= date);
-
-	for (auto it = _updatable.rbegin();
-		      it != _updatable.rend() && it->get().next_update() <= date;
-		      it++)
+	auto adv = [date](auto & c, auto & l)
 	{
-		it->get().update(date);
+		for (auto it = c.begin(); it != c.end(); ++it)
+			if ((*it)->next_update() <= date) {
+				(*it)->update(date);
+				if (l < (*it)->last_update())
+					l = (*it)->last_update();
+			}
+	};
 
-		_last_update = date;
-	}
-
-	sort();
-	clean_dead_timer();
+	adv(_cyclicals, _last_update);
+	adv(_abritraries, _last_update);
+	adv(_mutables, _last_update);
 }
 
 UniversalClock::time_point Scheduler::can_adv_to(UniversalClock::time_point date) const
 {
-	assert(is_sorted());
-
-	if (_updatable.empty() || _updatable.back().get().next_update() > date)
-		return (UniversalClock::time_point::max());
-
-	// ensure we will not miss a cycle
-	auto next_date = _updatable.back().get().next_update();
-	for(auto it = _updatable.crbegin();
-		     it != _updatable.crend() &&
-		     (it->get().next_update() > date &&
-		      it->get().next_update() > date);
-		     ++it) {
-		if (it->get().next_update() < next_date)
-			next_date = it->get().next_update();
-		if (it->get().next_next_update() < next_date)
-			next_date = it->get().next_next_update();
-	}
-
-	return (next_date);
+	UniversalClock::time_point res = next_update();
+	return (res > date ? date : res);
 }
 
 void Scheduler::advance_until(UniversalClock::time_point date)
 {
-	auto intermediate = can_adv_to(date);
-	for (; intermediate <= date && intermediate != UniversalClock::time_point::max();
-		 intermediate = can_adv_to(date)) {
-		UniversalClock::advance(intermediate - UniversalClock::now());
-		update(intermediate);
+	UniversalClock::time_point tmp = next_update();
+
+	while (tmp <= date) {
+		update(tmp);
+		tmp = next_update();
 	}
-	if (intermediate == UniversalClock::time_point::max() && UniversalClock::now() < date)
-		UniversalClock::advance(date - UniversalClock::now());	
 }
 
 void Scheduler::advance_until(UniversalClock::duration delta)
@@ -330,123 +358,58 @@ void Scheduler::advance_until(UniversalClock::duration delta)
 	advance_until(UniversalClock::now() + delta);
 }
 
-bool Scheduler::is_sorted() const
-{
-	return (std::is_sorted(_updatable.cbegin(), _updatable.cend(), I_Timer_less()));
-}
-
-void Scheduler::sort()
-{
-	std::stable_sort(_updatable.begin(), _updatable.end(), I_Timer_less());
-}
-
 void Scheduler::clean_dead_timer()
 {
-	assert(is_sorted());
-
-	auto last = _updatable.begin();
-	for (; last != _updatable.end() && last->get().next_update() == I_Timer::max(); last++)
-		;
-
-	_updatable.erase(_updatable.begin(), last);
 }
 
 void Scheduler::add(I_Timer & t)
 {
-	_updatable.push_back(t);
+	if (t.type() == I_Timer::Cyclical)
+		_cyclicals.push_back(&t);
+	else if (t.type() == I_Timer::Arbitrary)
+		_abritraries.push_back(&t);
+	else
+		_mutables.push_back(&t);
 
-	if (_last_update > t.last_update())
+	if (t.last_update() > _last_update)
 		_last_update = t.last_update();
-
-}
-
-void Scheduler::add_and_sort(I_Timer & t)
-{
-	add(t);
-	sort();	
-}
-
-bool Scheduler::empty() const
-{
-	return (_updatable.empty());
-}
-
-std::size_t Scheduler::size() const
-{
-	return (_updatable.size());
 }
 
 void Scheduler::clear()
 {
-	_updatable.clear();
+	_cyclicals.clear();
+	_abritraries.clear();
+	_mutables.clear();
+
+	_last_update = UniversalClock::time_point::max();
 }
 
-void Scheduler::erase(iterator it)
+Scheduler::container_t const & Scheduler::cyclicals() const
 {
-	_updatable.erase(it);
+	return (_cyclicals);
 }
 
-void Scheduler::erase(const_iterator it)
+Scheduler::container_t & Scheduler::cyclicals()
 {
-	_updatable.erase(it);
+	return (_cyclicals);
 }
 
-void Scheduler::erase(iterator first, iterator last)
+Scheduler::container_t const & Scheduler::abritraries() const
 {
-	_updatable.erase(first, last);
+	return (_abritraries);
 }
 
-void Scheduler::erase(const_iterator first, const_iterator last)
+Scheduler::container_t & Scheduler::abritraries()
 {
-	_updatable.erase(first, last);
+	return (_abritraries);
 }
 
-Scheduler::iterator Scheduler::begin()
+Scheduler::container_t const & Scheduler::mutables() const
 {
-	return (_updatable.begin());
+	return (_mutables);
 }
 
-Scheduler::iterator Scheduler::end()
+Scheduler::container_t & Scheduler::mutables()
 {
-	return (_updatable.end());
-}
-
-Scheduler::const_iterator Scheduler::cbegin() const
-{
-	return (_updatable.cbegin());
-}
-
-Scheduler::const_iterator Scheduler::cend() const
-{
-	return (_updatable.cend());
-}
-
-Scheduler::reverse_iterator Scheduler::rbegin()
-{
-	return (_updatable.rbegin());
-}
-
-Scheduler::reverse_iterator Scheduler::rend()
-{
-	return (_updatable.rend());
-}
-
-Scheduler::const_reverse_iterator Scheduler::crbegin() const
-{
-	return (_updatable.crbegin());
-}
-
-Scheduler::const_reverse_iterator Scheduler::crend() const
-{
-	return (_updatable.crend());
-}
-
-Scheduler::container_t const & Scheduler::container() const
-{
-	return (_updatable);
-}
-
-Scheduler::container_t & Scheduler::container()
-{
-	return (_updatable);
+	return (_mutables);
 }

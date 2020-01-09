@@ -23,14 +23,23 @@ static void display_scheduler(Scheduler const & scheduler, ux::PopupContextMenu 
 	ImGui::AlignTextToFramePadding();
 	
 	// Common mistake to avoid: if we want to SameLine after TreeNode we need to do it before we add child content.
-	bool node_open = ImGui::TreeNode(&scheduler, "");
+	bool node_open = ImGui::TreeNode(&scheduler, "scheduler");
 	
-	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-	display_timer(scheduler, context_id);
+	ux::display_in_context(scheduler, context_id);
+	if (ImGui::IsItemHovered())
+		ux::display_in_tooltip(scheduler);
 
 	if (node_open) {
-		for (auto it = scheduler.crbegin(); it != scheduler.crend(); ++it)
-			ux::display_in_tree(it->get(), context_id);
+		auto display = [](Scheduler::container_t const & c, ux::PopupContextMenu & context_id)
+		{
+			for (auto it = c.cbegin(); it != c.cend(); ++it)
+				ux::display_in_tree(**it, context_id);
+		};
+
+		display(scheduler.cyclicals(), context_id);
+		display(scheduler.abritraries(), context_id);
+		display(scheduler.mutables(), context_id);
+
 		ImGui::TreePop();
 	}
 }

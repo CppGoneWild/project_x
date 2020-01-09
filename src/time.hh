@@ -3,6 +3,7 @@
 
 
 
+
 #include <list>
 #include <functional> // reference_wrapper
 
@@ -20,6 +21,7 @@
 
 
 
+
 /*
           __  __      _                            __________           __
          / / / /___  (_)   _____  ______________ _/ / ____/ /___  _____/ /__
@@ -28,6 +30,7 @@
        \____/_/ /_/_/ |___/\___/_/  /____/\__,_/_/\____/_/\____/\___/_/|_|
        
 */
+
 
 
 
@@ -81,6 +84,7 @@ private:
 
 
 
+
 /*
                        ____   _______
                       /  _/  /_  __(_)___ ___  ___  _____
@@ -93,10 +97,15 @@ private:
 
 
 
+
 class I_Timer
 {
 public:
+	enum Type { Cyclical, Arbitrary, Mutable };
+
 	virtual ~I_Timer();
+
+	virtual Type type() const = 0;
 
 	virtual UniversalClock::time_point next_update() const = 0;
 	virtual UniversalClock::time_point next_next_update() const = 0;
@@ -121,6 +130,7 @@ protected:
 
 
 
+
 /*
                           _______
                          /_  __(_)___ ___  ___  _____
@@ -132,27 +142,30 @@ protected:
 
 
 
-class Timer : public I_Timer
+
+class CyclicalTimer : public I_Timer
 {
 public:
-	Timer()                   = default;
-	Timer(Timer const &)      = default;
-	Timer(Timer &&)           = default;
-	virtual ~Timer() override = default;
+	CyclicalTimer()                      = default;
+	CyclicalTimer(CyclicalTimer const &) = default;
+	CyclicalTimer(CyclicalTimer &&)      = default;
+	virtual ~CyclicalTimer() override    = default;
 
-	Timer & operator=(Timer const &) = default;
-	Timer & operator=(Timer &&)      = default;
+	CyclicalTimer & operator=(CyclicalTimer const &) = default;
+	CyclicalTimer & operator=(CyclicalTimer &&)      = default;
 
-	explicit Timer(UniversalClock::time_point next_update); // single shot mode
-	Timer(UniversalClock::duration frequency, UniversalClock::time_point current_time);
-	template <class D> Timer(D frequency, UniversalClock::time_point current_time);
+	CyclicalTimer(UniversalClock::duration frequency, UniversalClock::time_point next);
+	template <class D> CyclicalTimer(D frequency, UniversalClock::time_point next);
+
+	CyclicalTimer(UniversalClock::duration frequency);
+	template <class D> CyclicalTimer(D frequency);
+
+	virtual Type type() const override { return (Cyclical); };
 
 	virtual UniversalClock::time_point next_update() const override;
 	virtual UniversalClock::time_point next_next_update() const override;
-	UniversalClock::time_point & next_update();
 
 	UniversalClock::duration frequency() const;
-	UniversalClock::duration & frequency();
 
 	virtual void update(UniversalClock::time_point date) override;
 
@@ -160,6 +173,35 @@ private:
 	UniversalClock::duration _frequency;
 	UniversalClock::time_point _next_update;
 };
+
+
+
+
+class ArbitraryTimer : public I_Timer
+{
+public:
+	ArbitraryTimer()                      = default;
+	ArbitraryTimer(ArbitraryTimer const &) = default;
+	ArbitraryTimer(ArbitraryTimer &&)      = default;
+	virtual ~ArbitraryTimer() override    = default;
+
+	ArbitraryTimer & operator=(ArbitraryTimer const &) = default;
+	ArbitraryTimer & operator=(ArbitraryTimer &&)      = default;
+
+	virtual Type type() const override { return (Arbitrary); };
+
+	ArbitraryTimer(UniversalClock::time_point next_update);
+	template <class D> ArbitraryTimer(UniversalClock::time_point next_update);
+
+	virtual UniversalClock::time_point next_update() const override;
+	virtual UniversalClock::time_point next_next_update() const override;
+
+	virtual void update(UniversalClock::time_point date) override;
+
+private:
+	UniversalClock::time_point _next_update;
+};
+
 
 
 
@@ -174,20 +216,16 @@ private:
 
 
 
+
 class Scheduler : public I_Timer
 {
 public:
-	using container_t = std::vector<std::reference_wrapper<I_Timer>>;
+	using container_t = std::list<I_Timer *>;
 
-	using iterator               = container_t::iterator;
-	using const_iterator         = container_t::const_iterator;
-	using reverse_iterator       = container_t::reverse_iterator;
-	using const_reverse_iterator = container_t::const_reverse_iterator;
+	Scheduler();
+	virtual ~Scheduler() override;
 
-	Scheduler()                   = default;
-	Scheduler(Scheduler const &)  = default;
-	Scheduler(Scheduler &&)       = default;
-	virtual ~Scheduler() override = default;
+	virtual Type type() const override { return (Mutable); };
 
 	virtual UniversalClock::time_point next_update() const override;
 	virtual UniversalClock::time_point next_next_update() const override;
@@ -200,54 +238,38 @@ public:
 	template <class D> void advance_until(D delta);
 
 	/**
-	 * @brief return if is sorted by time in REVERSE order
-	 */
-	bool is_sorted() const;
-
-	/**
 	 * @brief stable sort by time in REVERSE order
 	 */
-	void sort();
 	void clean_dead_timer();
 
 	void add(I_Timer &);
-	void add_and_sort(I_Timer &);
-
-	template <class IT> void add(IT, IT);
-	template <class IT> void add_and_sort(IT, IT);
-
-	bool empty() const;
-	std::size_t size() const;
-
 	void clear();
 
-	void erase(iterator);
-	void erase(const_iterator);
-	void erase(iterator, iterator);
-	void erase(const_iterator, const_iterator);
+	container_t const & cyclicals() const;
+	container_t & cyclicals();
 
-	iterator begin();
-	iterator end();
+	container_t const & abritraries() const;
+	container_t & abritraries();
 
-	const_iterator cbegin() const;
-	const_iterator cend() const;
-
-	reverse_iterator rbegin();
-	reverse_iterator rend();
-
-	const_reverse_iterator crbegin() const;
-	const_reverse_iterator crend() const;
-
-	container_t const & container() const;
-	container_t & container();
+	container_t const & mutables() const;
+	container_t & mutables();
 
 private:
-	container_t _updatable;
+	Scheduler(Scheduler const &) = delete;
+	Scheduler(Scheduler &&) = delete;
+	Scheduler & operator=(Scheduler const &) = delete;
+	Scheduler & operator=(Scheduler &&) = delete;
+
+	container_t _cyclicals;
+	container_t _abritraries;
+	container_t _mutables;
 };
 
 
 
+
 #include "time.ipp"
+
 
 
 
